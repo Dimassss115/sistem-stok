@@ -6,12 +6,10 @@
     <title>Sistem Stok & Persediaan Gudang</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
+    <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-    </style>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body class="bg-[#e9f0f8] h-screen p-3 md:p-4 flex overflow-hidden">
 
@@ -21,7 +19,7 @@
         <!-- SIDEBAR CONTAINER (Kiri) -->
         <aside class="w-64 flex flex-col shrink-0 bg-white">
             
-            <!-- 1. HEADER LOGO (Latar Belakang Putih) -->
+            <!-- 1. HEADER LOGO -->
             <div class="px-6 py-5 flex items-center gap-3 bg-white">
                 <div class="p-2 bg-blue-600 text-white rounded-xl shadow-sm">
                     <i data-lucide="box" class="w-6 h-6"></i>
@@ -29,12 +27,12 @@
                 <h1 class="text-xl font-bold text-gray-800 tracking-tight">Gudangku</h1>
             </div>
 
-            <!-- 2. PANEL BIRU SIDEBAR (Mulai di bawah logo dengan Lekukan Kanan-Atas) -->
+            <!-- 2. PANEL BIRU SIDEBAR -->
             <div class="flex-1 bg-[#1d61d1] text-white flex flex-col justify-between p-6 rounded-tr-[40px]">
                 
                 <div class="space-y-6">
-                    <!-- Tombol Utama (Pill Button Putih) -->
-                    <button class="w-full bg-white text-[#1d61d1] font-semibold py-3 px-5 rounded-full flex items-center justify-center gap-2 shadow-sm hover:bg-blue-50 transition text-sm">
+                    <!-- Tombol Utama -->
+                    <button onclick="openModal('modal-stok', 'add')" class="w-full bg-white text-[#1d61d1] font-semibold py-3 px-5 rounded-full flex items-center justify-center gap-2 shadow-sm hover:bg-blue-50 transition text-sm">
                         <i data-lucide="plus-circle" class="w-5 h-5"></i>
                         <span>Input Stok Baru</span>
                     </button>
@@ -68,11 +66,10 @@
                     </nav>
                 </div>
 
-                <!-- 3. DETAIL KAPASITAS GUDANG (Bawah Sidebar) -->
+                <!-- 3. DETAIL KAPASITAS GUDANG -->
                 <div class="pt-5 border-t border-blue-400/30 text-xs space-y-3">
                     <p class="text-[10px] font-bold tracking-wider text-blue-200 uppercase">Detail Kapasitas</p>
                     
-                    <!-- Indicator 1 -->
                     <div class="space-y-1">
                         <div class="flex justify-between text-blue-100 text-[11px]">
                             <span class="flex items-center gap-1.5"><i data-lucide="hard-drive" class="w-3.5 h-3.5"></i> Storage Rak</span>
@@ -83,7 +80,6 @@
                         <p class="text-[10px] text-blue-200">1.240 dari 1.600 slot terpakai</p>
                     </div>
 
-                    <!-- Indicator 2 -->
                     <div class="space-y-1 pt-1">
                         <div class="flex justify-between text-blue-100 text-[11px]">
                             <span class="flex items-center gap-1.5"><i data-lucide="layers" class="w-3.5 h-3.5"></i> Volume Terisi</span>
@@ -102,13 +98,11 @@
             
             <!-- TOPBAR / HEADER -->
             <header class="flex justify-between items-center mb-8">
-                <!-- Search Bar -->
                 <div class="relative w-96">
                     <i data-lucide="search" class="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
                     <input type="text" placeholder="Cari Kode SKU, Nama Barang, Rak..." class="w-full pl-11 pr-4 py-2.5 bg-gray-100/80 rounded-full text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700">
                 </div>
 
-                <!-- Profile & Notifications -->
                 <div class="flex items-center gap-4">
                     <button class="relative p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition">
                         <i data-lucide="bell" class="w-5 h-5"></i>
@@ -207,8 +201,8 @@
                                     <td class="py-3.5 px-5 font-semibold">12 unit</td>
                                     <td class="py-3.5 px-5 text-gray-400">Rak A-01</td>
                                     <td class="py-3.5 px-5 text-center text-gray-400">
-                                        <button class="p-1 hover:text-[#1d61d1] mr-1"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-                                        <button class="p-1 hover:text-red-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                        <button onclick="openModal('modal-stok', 'edit', 'BRG-001', 'Laptop Asus Core i5', 'Elektronik', 12, 'unit', 'Rak A-01')" class="p-1 hover:text-[#1d61d1] mr-1"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                                        <button onclick="alert('Fitur hapus barang')" class="p-1 hover:text-red-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                                     </td>
                                 </tr>
                                 <tr class="hover:bg-gray-50/50 transition">
@@ -220,8 +214,8 @@
                                     </td>
                                     <td class="py-3.5 px-5 text-gray-400">Rak B-03</td>
                                     <td class="py-3.5 px-5 text-center text-gray-400">
-                                        <button class="p-1 hover:text-[#1d61d1] mr-1"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-                                        <button class="p-1 hover:text-red-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                        <button onclick="openModal('modal-stok', 'edit', 'BRG-002', 'Kabel LAN Cat6 50m', 'Jaringan', 3, 'roll', 'Rak B-03')" class="p-1 hover:text-[#1d61d1] mr-1"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                                        <button onclick="alert('Fitur hapus barang')" class="p-1 hover:text-red-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                                     </td>
                                 </tr>
                                 <tr class="hover:bg-gray-50/50 transition">
@@ -231,8 +225,8 @@
                                     <td class="py-3.5 px-5 font-semibold">25 unit</td>
                                     <td class="py-3.5 px-5 text-gray-400">Rak B-01</td>
                                     <td class="py-3.5 px-5 text-center text-gray-400">
-                                        <button class="p-1 hover:text-[#1d61d1] mr-1"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-                                        <button class="p-1 hover:text-red-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                        <button onclick="openModal('modal-stok', 'edit', 'BRG-003', 'Switch Hub 16 Port', 'Jaringan', 25, 'unit', 'Rak B-01')" class="p-1 hover:text-[#1d61d1] mr-1"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                                        <button onclick="alert('Fitur hapus barang')" class="p-1 hover:text-red-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -245,9 +239,67 @@
 
     </div>
 
-    <!-- Render Icons -->
-    <script>
-        lucide.createIcons();
-    </script>
+    <!-- MODAL FORM -->
+    <div id="modal-stok" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-200">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-lg shadow-2xl transform scale-95 transition-transform duration-200 space-y-5">
+            
+            <div class="flex justify-between items-center border-b border-gray-100 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="p-2 bg-blue-50 text-[#1d61d1] rounded-xl">
+                        <i data-lucide="package-plus" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-gray-800" id="modal-title">Input Stok Barang Baru</h3>
+                </div>
+                <button onclick="closeModal('modal-stok')" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form id="form-barang" onsubmit="event.preventDefault();" class="space-y-4 text-xs">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-gray-700 mb-1">Kode SKU</label>
+                        <input type="text" id="input-sku" placeholder="Contoh: BRG-004" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-800">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-gray-700 mb-1">Lokasi Rak</label>
+                        <input type="text" id="input-rak" placeholder="Contoh: Rak C-02" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-800">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Nama Barang</label>
+                    <input type="text" id="input-nama" placeholder="Masukkan nama barang..." class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-800">
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="col-span-1">
+                        <label class="block font-semibold text-gray-700 mb-1">Kategori</label>
+                        <select id="input-kategori" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-800">
+                            <option value="Elektronik">Elektronik</option>
+                            <option value="Jaringan">Jaringan</option>
+                            <option value="Aksesoris">Aksesoris</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-gray-700 mb-1">Jumlah Stok</label>
+                        <input type="number" id="input-stok" min="0" placeholder="0" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-800">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-gray-700 mb-1">Satuan</label>
+                        <input type="text" id="input-satuan" placeholder="unit / pcs" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-800">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3 border-t border-gray-100">
+                    <button type="button" onclick="closeModal('modal-stok')" class="px-4 py-2.5 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition">Batal</button>
+                    <button type="button" onclick="closeModal('modal-stok')" class="px-5 py-2.5 bg-[#1d61d1] text-white font-semibold rounded-xl hover:bg-blue-700 shadow-sm transition">Simpan Barang</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- External Custom JS -->
+    <script src="assets/js/app.js"></script>
 </body>
 </html>
