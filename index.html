@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Stok & Persediaan Gudang</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen flex overflow-hidden">
+
+    <!-- SIDEBAR KIRI (Biru Kontras) -->
+    <aside class="w-64 bg-blue-600 text-white flex flex-col justify-between p-5 shadow-lg">
+        <div>
+            <!-- Logo & Title -->
+            <div class="flex items-center gap-3 mb-8 px-2">
+                <div class="p-2 bg-white text-blue-600 rounded-lg">
+                    <i data-lucide="box" class="w-6 h-6"></i>
+                </div>
+                <h1 class="text-xl font-bold tracking-wide">Gudangku</h1>
+            </div>
+
+            <!-- Main Action Button -->
+            <button class="w-full bg-white text-blue-600 font-semibold py-3 px-4 rounded-full flex items-center justify-center gap-2 shadow-md hover:bg-blue-50 transition mb-6">
+                <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                <span>Input Stok Baru</span>
+            </button>
+
+            <!-- Navigasi Menu -->
+            <nav class="space-y-1">
+                <a href="index.html" class="flex items-center gap-3 px-4 py-3 bg-blue-700/80 rounded-xl font-medium text-white transition">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-blue-100 hover:bg-blue-500/50 rounded-xl font-medium transition">
+                    <i data-lucide="package" class="w-5 h-5"></i>
+                    <span>Data Barang</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-blue-100 hover:bg-blue-500/50 rounded-xl font-medium transition">
+                    <i data-lucide="tags" class="w-5 h-5"></i>
+                    <span>Kategori</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-blue-100 hover:bg-blue-500/50 rounded-xl font-medium transition">
+                    <i data-lucide="arrow-down-left" class="w-5 h-5"></i>
+                    <span>Stok Masuk</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-blue-100 hover:bg-blue-500/50 rounded-xl font-medium transition">
+                    <i data-lucide="arrow-up-right" class="w-5 h-5"></i>
+                    <span>Stok Keluar</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-blue-100 hover:bg-blue-500/50 rounded-xl font-medium transition">
+                    <i data-lucide="file-text" class="w-5 h-5"></i>
+                    <span>Laporan Mutasi</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Widget Bottom Sidebar (Kapasitas Gudang) -->
+        <div class="bg-blue-700/50 p-4 rounded-2xl text-xs space-y-2 border border-blue-400/30">
+            <div class="flex justify-between font-semibold">
+                <span>Kapasitas Rak</span>
+                <span>75% Terisi</span>
+            </div>
+            <div class="w-full bg-blue-900/40 h-2 rounded-full overflow-hidden">
+                <div class="bg-white h-full w-[75%] rounded-full"></div>
+            </div>
+            <p class="text-blue-200 text-[10px]">1.240 dari 1.600 slot terpakai</p>
+        </div>
+    </aside>
+
+    <!-- AREA KONTEN UTAMA -->
+    <main class="flex-1 flex flex-col overflow-y-auto">
+        
+        <!-- TOPBAR / HEADER -->
+        <header class="bg-white border-b border-gray-200 px-8 py-4 flex justify-between items-center sticky top-0 z-10">
+            <!-- Search Bar -->
+            <div class="relative w-96">
+                <i data-lucide="search" class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input type="text" placeholder="Cari Kode SKU, Nama Barang, Rak..." class="w-full pl-10 pr-4 py-2 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700">
+            </div>
+
+            <!-- Profile & Notifications -->
+            <div class="flex items-center gap-4">
+                <button class="relative p-2 text-gray-500 hover:bg-gray-100 rounded-full transition">
+                    <i data-lucide="bell" class="w-5 h-5"></i>
+                    <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                </button>
+                <div class="flex items-center gap-3 pl-4 border-l border-gray-200">
+                    <div class="text-right">
+                        <p class="text-sm font-semibold text-gray-800">Admin Gudang</p>
+                        <p class="text-xs text-gray-500">Petugas Utama</p>
+                    </div>
+                    <div class="w-10 h-10 bg-blue-600 text-white font-bold rounded-full flex items-center justify-center">
+                        AG
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- DASHBOARD CONTAINER -->
+        <div class="p-8 space-y-8">
+            
+            <!-- SECTION 1: QUICK ACCESS CARDS -->
+            <div>
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Ringkasan Persediaan</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                    
+                    <!-- Card 1: Total Barang -->
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+                        <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
+                            <i data-lucide="boxes" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 font-medium">Total Item</p>
+                            <h3 class="text-2xl font-bold text-gray-800">1,240</h3>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Stok Kritis (Warning) -->
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+                        <div class="p-3 bg-red-50 text-red-600 rounded-xl">
+                            <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 font-medium">Stok Kritis (&lt; 5)</p>
+                            <h3 class="text-2xl font-bold text-red-600">3 Barang</h3>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Stok Masuk Hari Ini -->
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+                        <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+                            <i data-lucide="arrow-down-left" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 font-medium">Masuk Hari Ini</p>
+                            <h3 class="text-2xl font-bold text-gray-800">+150</h3>
+                        </div>
+                    </div>
+
+                    <!-- Card 4: Stok Keluar Hari Ini -->
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+                        <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
+                            <i data-lucide="arrow-up-right" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 font-medium">Keluar Hari Ini</p>
+                            <h3 class="text-2xl font-bold text-gray-800">-45</h3>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- SECTION 2: DATA TABLE PERSERDIAAN BARANG -->
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div class="p-6 flex justify-between items-center border-b border-gray-100">
+                    <h2 class="text-lg font-bold text-gray-800">Daftar Stok Barang</h2>
+                    <div class="flex gap-2">
+                        <button class="px-4 py-2 border border-gray-200 text-gray-600 text-xs font-semibold rounded-lg hover:bg-gray-50">Filter Kategori</button>
+                        <button class="px-4 py-2 border border-gray-200 text-gray-600 text-xs font-semibold rounded-lg hover:bg-gray-50">Export PDF/CSV</button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-400 uppercase text-[11px] font-semibold tracking-wider">
+                                <th class="py-4 px-6">Kode SKU</th>
+                                <th class="py-4 px-6">Nama Barang</th>
+                                <th class="py-4 px-6">Kategori</th>
+                                <th class="py-4 px-6">Jumlah Stok</th>
+                                <th class="py-4 px-6">Lokasi Rak</th>
+                                <th class="py-4 px-6 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 text-sm text-gray-700">
+                            <!-- Dummy Row 1 -->
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="py-4 px-6 font-semibold text-blue-600">BRG-001</td>
+                                <td class="py-4 px-6 font-medium text-gray-900">Laptop Asus Core i5</td>
+                                <td class="py-4 px-6"><span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-medium">Elektronik</span></td>
+                                <td class="py-4 px-6 font-semibold">12 unit</td>
+                                <td class="py-4 px-6 text-gray-500">Rak A-01</td>
+                                <td class="py-4 px-6 text-center">
+                                    <button class="p-1 hover:text-blue-600 mr-2"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                                    <button class="p-1 hover:text-red-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                </td>
+                            </tr>
+                            <!-- Dummy Row 2 (Kritis) -->
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="py-4 px-6 font-semibold text-blue-600">BRG-002</td>
+                                <td class="py-4 px-6 font-medium text-gray-900">Kabel LAN Cat6 50m</td>
+                                <td class="py-4 px-6"><span class="px-3 py-1 bg-purple-50 text-purple-600 rounded-full text-xs font-medium">Jaringan</span></td>
+                                <td class="py-4 px-6 font-semibold text-red-600 flex items-center gap-2">
+                                    3 roll <span class="px-2 py-0.5 bg-red-100 text-red-600 text-[10px] rounded font-bold">Stok Kritis</span>
+                                </td>
+                                <td class="py-4 px-6 text-gray-500">Rak B-03</td>
+                                <td class="py-4 px-6 text-center">
+                                    <button class="p-1 hover:text-blue-600 mr-2"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                                    <button class="p-1 hover:text-red-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                </td>
+                            </tr>
+                            <!-- Dummy Row 3 -->
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="py-4 px-6 font-semibold text-blue-600">BRG-003</td>
+                                <td class="py-4 px-6 font-medium text-gray-900">Switch Hub 16 Port</td>
+                                <td class="py-4 px-6"><span class="px-3 py-1 bg-purple-50 text-purple-600 rounded-full text-xs font-medium">Jaringan</span></td>
+                                <td class="py-4 px-6 font-semibold">25 unit</td>
+                                <td class="py-4 px-6 text-gray-500">Rak B-01</td>
+                                <td class="py-4 px-6 text-center">
+                                    <button class="p-1 hover:text-blue-600 mr-2"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                                    <button class="p-1 hover:text-red-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Render Icons -->
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
