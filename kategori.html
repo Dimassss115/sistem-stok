@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Kategori - Sistem Gudang</title>
+    <title>Master Kategori - Gudangku</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons CDN -->
@@ -19,7 +19,7 @@
         <!-- SIDEBAR CONTAINER (Kiri) -->
         <aside class="w-64 flex flex-col shrink-0 bg-white">
             
-            <!-- 1. HEADER LOGO -->
+            <!-- LOGO HEADER -->
             <div class="px-6 py-5 flex items-center gap-3 bg-white">
                 <div class="p-2 bg-blue-600 text-white rounded-xl shadow-sm">
                     <i data-lucide="box" class="w-6 h-6"></i>
@@ -27,7 +27,7 @@
                 <h1 class="text-xl font-bold text-gray-800 tracking-tight">Gudangku</h1>
             </div>
 
-            <!-- 2. PANEL BIRU SIDEBAR -->
+            <!-- PANEL BIRU SIDEBAR -->
             <div class="flex-1 bg-[#1d61d1] text-white flex flex-col justify-between p-6 rounded-tr-[40px]">
                 
                 <div class="space-y-6">
@@ -37,15 +37,11 @@
                         <span>Tambah Kategori</span>
                     </button>
 
-                    <!-- Navigasi Menu -->
+                    <!-- Navigasi Menu Utama -->
                     <nav class="space-y-1 text-sm font-medium">
                         <a href="index.html" class="flex items-center gap-4 px-4 py-3 text-blue-100 hover:bg-white/10 rounded-full transition">
                             <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
                             <span>Dashboard</span>
-                        </a>
-                        <a href="index.html" class="flex items-center gap-4 px-4 py-3 text-blue-100 hover:bg-white/10 rounded-full transition">
-                            <i data-lucide="package" class="w-5 h-5"></i>
-                            <span>Data Barang</span>
                         </a>
                         <a href="kategori.html" class="flex items-center gap-4 px-4 py-3 text-white bg-white/20 rounded-full font-semibold transition">
                             <i data-lucide="tags" class="w-5 h-5"></i>
@@ -62,7 +58,7 @@
                     </nav>
                 </div>
 
-                <!-- 3. DETAIL KAPASITAS GUDANG -->
+                <!-- WIDGET KAPASITAS GUDANG -->
                 <div class="pt-5 border-t border-blue-400/30 text-xs space-y-3">
                     <p class="text-[10px] font-bold tracking-wider text-blue-200 uppercase">Detail Kapasitas</p>
                     <div class="space-y-1">
@@ -79,7 +75,7 @@
             </div>
         </aside>
 
-        <!-- AREA KONTEN UTAMA (Kanan) -->
+        <!-- AREA KONTEN UTAMA -->
         <main class="flex-1 flex flex-col overflow-y-auto px-8 py-6">
             
             <!-- TOPBAR / HEADER -->
@@ -90,21 +86,21 @@
                     <input type="text" id="search-kategori" oninput="handleSearchKategori()" placeholder="Cari Nama Kategori..." class="w-full pl-11 pr-4 py-2.5 bg-gray-100/80 rounded-full text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700">
                 </div>
 
-                <!-- Profile & Notifications -->
+                <!-- Profile -->
                 <div class="flex items-center gap-4">
                     <button class="relative p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition">
                         <i data-lucide="bell" class="w-5 h-5"></i>
                         <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-600 rounded-full"></span>
                     </button>
-                    <div class="flex items-center gap-3 pl-3 border-l border-gray-200">
+                    <a href="login.html" class="flex items-center gap-3 pl-3 border-l border-gray-200 hover:opacity-80 transition">
                         <div class="text-right">
                             <p class="text-xs font-bold text-gray-800">Admin Gudang</p>
-                            <p class="text-[10px] text-gray-400">Petugas Utama</p>
+                            <p class="text-[10px] text-gray-400">Keluar Sistem</p>
                         </div>
                         <div class="w-9 h-9 bg-[#1d61d1] text-white font-bold text-xs rounded-full flex items-center justify-center shadow-sm">
                             AG
                         </div>
-                    </div>
+                    </a>
                 </div>
             </header>
 
@@ -118,56 +114,7 @@
 
                 <!-- CARDS RINGKASAN KATEGORI -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="grid-kategori">
-                    <!-- Item Kategori 1 -->
-                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
-                        <div class="flex items-center gap-4">
-                            <div class="p-3 bg-blue-50 text-[#1d61d1] rounded-2xl">
-                                <i data-lucide="laptop" class="w-6 h-6"></i>
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-gray-800 text-sm">Elektronik</h3>
-                                <p class="text-xs text-gray-400">12 Item Terdaftar</p>
-                            </div>
-                        </div>
-                        <div class="flex gap-1 text-gray-400">
-                            <button onclick="openModalKategori('edit', 'Elektronik')" class="p-1.5 hover:text-[#1d61d1]"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-                            <button onclick="confirmDeleteKategori('Elektronik')" class="p-1.5 hover:text-red-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                        </div>
-                    </div>
-
-                    <!-- Item Kategori 2 -->
-                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
-                        <div class="flex items-center gap-4">
-                            <div class="p-3 bg-purple-50 text-purple-600 rounded-2xl">
-                                <i data-lucide="network" class="w-6 h-6"></i>
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-gray-800 text-sm">Jaringan</h3>
-                                <p class="text-xs text-gray-400">8 Item Terdaftar</p>
-                            </div>
-                        </div>
-                        <div class="flex gap-1 text-gray-400">
-                            <button onclick="openModalKategori('edit', 'Jaringan')" class="p-1.5 hover:text-[#1d61d1]"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-                            <button onclick="confirmDeleteKategori('Jaringan')" class="p-1.5 hover:text-red-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                        </div>
-                    </div>
-
-                    <!-- Item Kategori 3 -->
-                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
-                        <div class="flex items-center gap-4">
-                            <div class="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
-                                <i data-lucide="plug" class="w-6 h-6"></i>
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-gray-800 text-sm">Aksesoris</h3>
-                                <p class="text-xs text-gray-400">5 Item Terdaftar</p>
-                            </div>
-                        </div>
-                        <div class="flex gap-1 text-gray-400">
-                            <button onclick="openModalKategori('edit', 'Aksesoris')" class="p-1.5 hover:text-[#1d61d1]"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-                            <button onclick="confirmDeleteKategori('Aksesoris')" class="p-1.5 hover:text-red-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                        </div>
-                    </div>
+                    <!-- Item Kategori di-render dinamis oleh assets/js/kategori.js -->
                 </div>
 
             </div>
@@ -175,7 +122,7 @@
 
     </div>
 
-    <!-- ================= MODAL FORM: TAMBAH / EDIT KATEGORI ================= -->
+    <!-- MODAL FORM: TAMBAH / EDIT KATEGORI -->
     <div id="modal-kategori" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-200">
         <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-200 space-y-5">
             
@@ -191,7 +138,7 @@
                 </button>
             </div>
 
-            <form id="form-kategori" onsubmit="event.preventDefault(); closeModal('modal-kategori');" class="space-y-4 text-xs">
+            <form id="form-kategori" onsubmit="event.preventDefault(); saveKategori();" class="space-y-4 text-xs">
                 <div>
                     <label class="block font-semibold text-gray-700 mb-1">Nama Kategori</label>
                     <input type="text" id="input-nama-kategori" required placeholder="Contoh: Perangkat Komunikasi" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-800">
@@ -205,25 +152,8 @@
         </div>
     </div>
 
-    <!-- Script External & Inline Modal Helper -->
+    <!-- External Custom JS -->
     <script src="assets/js/app.js"></script>
-    <script>
-        function openModalKategori(mode = 'add', nama = '') {
-            const title = document.getElementById('modal-kategori-title');
-            const input = document.getElementById('input-nama-kategori');
-            if (mode === 'edit') {
-                title.innerText = 'Edit Kategori Barang';
-                input.value = nama;
-            } else {
-                title.innerText = 'Tambah Kategori Baru';
-                input.value = '';
-            }
-            openModal('modal-kategori');
-        }
-
-        function confirmDeleteKategori(nama) {
-            confirmDelete(nama);
-        }
-    </script>
+    <script src="assets/js/kategori.js"></script>
 </body>
 </html>

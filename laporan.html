@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Mutasi - Sistem Gudang</title>
+    <title>Laporan Mutasi - Gudangku</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons CDN -->
@@ -36,10 +36,6 @@
                         <a href="index.html" class="flex items-center gap-4 px-4 py-3 text-blue-100 hover:bg-white/10 rounded-full transition">
                             <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
                             <span>Dashboard</span>
-                        </a>
-                        <a href="index.html" class="flex items-center gap-4 px-4 py-3 text-blue-100 hover:bg-white/10 rounded-full transition">
-                            <i data-lucide="package" class="w-5 h-5"></i>
-                            <span>Data Barang</span>
                         </a>
                         <a href="kategori.html" class="flex items-center gap-4 px-4 py-3 text-blue-100 hover:bg-white/10 rounded-full transition">
                             <i data-lucide="tags" class="w-5 h-5"></i>
@@ -74,53 +70,41 @@
         <!-- KONTEN UTAMA -->
         <main class="flex-1 flex flex-col overflow-y-auto px-8 py-6">
             <header class="flex justify-between items-center mb-8">
-                <h2 class="text-lg font-bold text-gray-800">Rekap Laporan Mutasi Stok</h2>
-                <button onclick="alert('Exporting data to CSV...')" class="px-4 py-2 border border-gray-200 text-gray-700 text-xs font-semibold rounded-xl hover:bg-gray-50 flex items-center gap-2">
+                <div>
+                    <h2 class="text-lg font-bold text-gray-800">Rekap Laporan Mutasi Stok</h2>
+                    <p class="text-xs text-gray-400">Laporan pertanggungjawaban data masuk dan keluar persediaan barang</p>
+                </div>
+                <button onclick="exportToCSV()" class="px-4 py-2.5 bg-[#1d61d1] text-white text-xs font-semibold rounded-xl hover:bg-blue-700 shadow-sm flex items-center gap-2 transition">
                     <i data-lucide="download" class="w-4 h-4"></i> Export CSV
                 </button>
             </header>
 
-            <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
+            <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-5">
                 <div class="flex gap-4 border-b border-gray-100 pb-4 text-xs font-medium">
                     <div>
                         <label class="block text-gray-500 mb-1">Dari Tanggal</label>
-                        <input type="date" value="2026-11-01" class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl">
+                        <input type="date" id="tgl-mulai" onchange="filterLaporanByDate()" value="2026-11-01" class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div>
                         <label class="block text-gray-500 mb-1">Sampai Tanggal</label>
-                        <input type="date" value="2026-11-05" class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl">
+                        <input type="date" id="tgl-selesai" onchange="filterLaporanByDate()" value="2026-11-05" class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                 </div>
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-xs border-collapse">
                         <thead>
-                            <tr class="bg-gray-50 text-gray-400 uppercase text-[10px] font-bold">
+                            <tr class="bg-gray-50/50 text-gray-400 uppercase text-[10px] font-bold tracking-wider">
                                 <th class="py-3 px-4">Tanggal</th>
-                                <th class="py-3 px-4">SKU</th>
+                                <th class="py-3 px-4">Kode SKU</th>
                                 <th class="py-3 px-4">Nama Barang</th>
-                                <th class="py-3 px-4">Jenis</th>
+                                <th class="py-3 px-4">Jenis Mutasi</th>
                                 <th class="py-3 px-4">Jumlah</th>
-                                <th class="py-3 px-4">Petugas</th>
+                                <th class="py-3 px-4">Petugas Gudang</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100 text-gray-700">
-                            <tr>
-                                <td class="py-3 px-4">05 Nov 2026</td>
-                                <td class="py-3 px-4 font-semibold text-[#1d61d1]">BRG-001</td>
-                                <td class="py-3 px-4">Laptop Asus Core i5</td>
-                                <td class="py-3 px-4"><span class="px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-full font-bold">MASUK</span></td>
-                                <td class="py-3 px-4 font-bold text-emerald-600">+10 unit</td>
-                                <td class="py-3 px-4 text-gray-500">Admin Gudang</td>
-                            </tr>
-                            <tr>
-                                <td class="py-3 px-4">05 Nov 2026</td>
-                                <td class="py-3 px-4 font-semibold text-[#1d61d1]">BRG-002</td>
-                                <td class="py-3 px-4">Kabel LAN Cat6 50m</td>
-                                <td class="py-3 px-4"><span class="px-2 py-0.5 bg-amber-50 text-amber-600 rounded-full font-bold">KELUAR</span></td>
-                                <td class="py-3 px-4 font-bold text-amber-600">-5 roll</td>
-                                <td class="py-3 px-4 text-gray-500">Admin Gudang</td>
-                            </tr>
+                        <tbody id="tabel-laporan-body" class="divide-y divide-gray-100 text-gray-700">
+                            <!-- Data di-render dinamis oleh assets/js/laporan.js -->
                         </tbody>
                     </table>
                 </div>
@@ -130,5 +114,6 @@
     </div>
 
     <script src="assets/js/app.js"></script>
+    <script src="assets/js/laporan.js"></script>
 </body>
 </html>
