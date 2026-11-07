@@ -1,5 +1,6 @@
 let targetDeleteSku = null;
 let modeForm = 'add';
+let allBarangData = []; // Penampung data untuk fitur Live Search
 
 // Muat data dari Supabase saat halaman dibuka
 document.addEventListener('DOMContentLoaded', () => {
@@ -32,7 +33,8 @@ async function loadBarangFromSupabase() {
         return;
     }
 
-    renderTableBarang(barangData);
+    allBarangData = barangData || [];
+    renderTableBarang(allBarangData);
 }
 
 // 2. RENDER TABLE
@@ -87,7 +89,20 @@ function renderTableBarang(data) {
     if (window.lucide) lucide.createIcons();
 }
 
-// 3. CREATE & UPDATE (Simpan / Edit Barang ke Supabase)
+// 3. FITUR LIVE SEARCH
+function handleSearch() {
+    const keyword = document.getElementById('search-input').value.toLowerCase().trim();
+    const filtered = allBarangData.filter(item => 
+        (item.sku && item.sku.toLowerCase().includes(keyword)) ||
+        (item.nama_barang && item.nama_barang.toLowerCase().includes(keyword)) ||
+        (item.rak && item.rak.toLowerCase().includes(keyword)) ||
+        (item.kategori_nama && item.kategori_nama.toLowerCase().includes(keyword))
+    );
+    renderTableBarang(filtered);
+}
+
+// 4. CREATE & UPDATE (Simpan / Edit Barang ke Supabase)
+
 async function saveBarang() {
     const sku = document.getElementById('input-sku').value.trim();
     const nama_barang = document.getElementById('input-nama').value.trim();
@@ -96,28 +111,49 @@ async function saveBarang() {
     const satuan = document.getElementById('input-satuan').value.trim() || 'unit';
     const rak = document.getElementById('input-rak').value.trim() || '-';
 
-    if (!sku || !nama_barang) return;
+    if (!sku || !nama_barang) {
+        alert('Kode SKU dan nama barang wajib diisi.');
+        return;
+    }
+
+    let error;
 
     if (modeForm === 'edit') {
-        const { error } = await supabaseClient
+        ({ error } = await supabaseClient
             .from('barang')
-            .update({ nama_barang, kategori_nama, stok, satuan, rak })
-            .eq('sku', sku);
-            
-        if (error) alert('Gagal mengupdate barang: ' + error.message);
+            .update({
+                nama_barang,
+                kategori_nama,
+                stok,
+                satuan,
+                rak
+            })
+            .eq('sku', sku));
     } else {
-        const { error } = await supabaseClient
+        ({ error } = await supabaseClient
             .from('barang')
-            .insert([{ sku, nama_barang, kategori_nama, stok, satuan, rak }]);
-            
-        if (error) alert('Gagal menambah barang: ' + error.message);
+            .insert([{
+                sku,
+                nama_barang,
+                kategori_nama,
+                stok,
+                satuan,
+                rak
+            }]));
+    }
+
+    if (error) {
+        alert('Gagal menyimpan barang: ' + error.message);
+        console.error(error);
+        return;
     }
 
     closeModal('modal-stok');
-    loadBarangFromSupabase();
+    await loadBarangFromSupabase();
 }
 
-// 4. DELETE (Hapus Barang dari Supabase)
+
+// 5. DELETE (Hapus Barang dari Supabase)
 function confirmDeleteBarang(sku) {
     targetDeleteSku = sku;
     document.getElementById('delete-target-sku').innerText = sku;
