@@ -1,30 +1,51 @@
-// Mock Data Master Barang
-let barangData = [
-    { sku: 'BRG-001', nama: 'Laptop Asus Core i5', kategori: 'Elektronik', stok: 12, satuan: 'unit', rak: 'Rak A-01' },
-    { sku: 'BRG-002', nama: 'Kabel LAN Cat6 50m', kategori: 'Jaringan', stok: 3, satuan: 'roll', rak: 'Rak B-03' },
-    { sku: 'BRG-003', nama: 'Switch Hub 16 Port', kategori: 'Jaringan', stok: 25, satuan: 'unit', rak: 'Rak B-01' }
-];
-
 let targetDeleteSku = null;
 let modeForm = 'add';
 
-// Render Tabel saat Halaman Dimuat
+// Muat data dari Supabase saat halaman dibuka
 document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('tabel-barang-body')) {
-        renderTableBarang(barangData);
+        loadBarangFromSupabase();
     }
 });
 
+// 1. READ (Ambil Data Barang dari Supabase)
+async function loadBarangFromSupabase() {
+    const tbody = document.getElementById('tabel-barang-body');
+    if (!tbody) return;
+
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="6" class="py-8 text-center text-gray-400">
+                Memuat data dari database Supabase...
+            </td>
+        </tr>
+    `;
+
+    const { data: barangData, error } = await supabaseClient
+        .from('barang')
+        .select('*')
+        .order('id', { ascending: false });
+
+    if (error) {
+        console.error('Eror mengambil data:', error);
+        tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-red-500">Gagal memuat data dari database.</td></tr>`;
+        return;
+    }
+
+    renderTableBarang(barangData);
+}
+
+// 2. RENDER TABLE
 function renderTableBarang(data) {
     const tbody = document.getElementById('tabel-barang-body');
     if (!tbody) return;
 
-    if (data.length === 0) {
+    if (!data || data.length === 0) {
         tbody.innerHTML = `
             <tr>
                 <td colspan="6" class="py-8 text-center text-gray-400">
                     <i data-lucide="package-search" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
-                    Data barang tidak ditemukan.
+                    Belum ada data barang di database.
                 </td>
             </tr>
         `;
@@ -34,7 +55,7 @@ function renderTableBarang(data) {
 
     tbody.innerHTML = data.map(item => {
         const isKritis = item.stok <= 5;
-        const badgeKategoriColor = item.kategori === 'Elektronik' 
+        const badgeKategoriColor = item.kategori_nama === 'Elektronik' 
             ? 'bg-blue-50 text-[#1d61d1]' 
             : 'bg-purple-50 text-purple-600';
 
@@ -45,14 +66,14 @@ function renderTableBarang(data) {
         return `
             <tr class="hover:bg-gray-50/50 transition">
                 <td class="py-3.5 px-5 font-semibold text-[#1d61d1]">${item.sku}</td>
-                <td class="py-3.5 px-5 font-medium text-gray-900">${item.nama}</td>
+                <td class="py-3.5 px-5 font-medium text-gray-900">${item.nama_barang}</td>
                 <td class="py-3.5 px-5">
-                    <span class="px-2.5 py-1 ${badgeKategoriColor} rounded-full text-[11px] font-medium">${item.kategori}</span>
+                    <span class="px-2.5 py-1 ${badgeKategoriColor} rounded-full text-[11px] font-medium">${item.kategori_nama || 'Umum'}</span>
                 </td>
                 <td class="py-3.5 px-5 font-semibold ${isKritis ? 'text-red-600 flex items-center' : ''}">${stokDisplay}</td>
                 <td class="py-3.5 px-5 text-gray-400">${item.rak}</td>
                 <td class="py-3.5 px-5 text-center text-gray-400">
-                    <button onclick="openModalBarang('edit', '${item.sku}', '${item.nama}', '${item.kategori}', ${item.stok}, '${item.satuan}', '${item.rak}')" class="p-1 hover:text-[#1d61d1] mr-1" title="Edit">
+                    <button onclick="openModalBarang('edit', '${item.sku}', '${item.nama_barang}', '${item.kategori_nama}', ${item.stok}, '${item.satuan}', '${item.rak}')" class="p-1 hover:text-[#1d61d1] mr-1" title="Edit">
                         <i data-lucide="edit-3" class="w-4 h-4"></i>
                     </button>
                     <button onclick="confirmDeleteBarang('${item.sku}')" class="p-1 hover:text-red-600" title="Hapus">
@@ -66,19 +87,61 @@ function renderTableBarang(data) {
     if (window.lucide) lucide.createIcons();
 }
 
-// Live Search Barang
-function handleSearch() {
-    const keyword = document.getElementById('search-input').value.toLowerCase().trim();
-    const filtered = barangData.filter(item => 
-        item.sku.toLowerCase().includes(keyword) ||
-        item.nama.toLowerCase().includes(keyword) ||
-        item.rak.toLowerCase().includes(keyword) ||
-        item.kategori.toLowerCase().includes(keyword)
-    );
-    renderTableBarang(filtered);
+// 3. CREATE & UPDATE (Simpan / Edit Barang ke Supabase)
+async function saveBarang() {
+    const sku = document.getElementById('input-sku').value.trim();
+    const nama_barang = document.getElementById('input-nama').value.trim();
+    const kategori_nama = document.getElementById('input-kategori').value;
+    const stok = parseInt(document.getElementById('input-stok').value) || 0;
+    const satuan = document.getElementById('input-satuan').value.trim() || 'unit';
+    const rak = document.getElementById('input-rak').value.trim() || '-';
+
+    if (!sku || !nama_barang) return;
+
+    if (modeForm === 'edit') {
+        const { error } = await supabaseClient
+            .from('barang')
+            .update({ nama_barang, kategori_nama, stok, satuan, rak })
+            .eq('sku', sku);
+            
+        if (error) alert('Gagal mengupdate barang: ' + error.message);
+    } else {
+        const { error } = await supabaseClient
+            .from('barang')
+            .insert([{ sku, nama_barang, kategori_nama, stok, satuan, rak }]);
+            
+        if (error) alert('Gagal menambah barang: ' + error.message);
+    }
+
+    closeModal('modal-stok');
+    loadBarangFromSupabase();
 }
 
-// Buka Modal Input / Edit Barang
+// 4. DELETE (Hapus Barang dari Supabase)
+function confirmDeleteBarang(sku) {
+    targetDeleteSku = sku;
+    document.getElementById('delete-target-sku').innerText = sku;
+    openModal('modal-hapus');
+}
+
+async function executeDelete() {
+    if (!targetDeleteSku) return;
+
+    const { error } = await supabaseClient
+        .from('barang')
+        .delete()
+        .eq('sku', targetDeleteSku);
+
+    if (error) {
+        alert('Gagal menghapus barang: ' + error.message);
+    } else {
+        targetDeleteSku = null;
+        closeModal('modal-hapus');
+        loadBarangFromSupabase();
+    }
+}
+
+// Modal helper
 function openModalBarang(mode = 'add', sku = '', nama = '', kategori = 'Elektronik', stok = '', satuan = '', rak = '') {
     modeForm = mode;
     const title = document.getElementById('modal-title');
@@ -99,48 +162,4 @@ function openModalBarang(mode = 'add', sku = '', nama = '', kategori = 'Elektron
     }
 
     openModal('modal-stok');
-}
-
-// Simpan Barang (Tambah / Update)
-function saveBarang() {
-    const sku = document.getElementById('input-sku').value.trim();
-    const nama = document.getElementById('input-nama').value.trim();
-    const kategori = document.getElementById('input-kategori').value;
-    const stok = parseInt(document.getElementById('input-stok').value) || 0;
-    const satuan = document.getElementById('input-satuan').value.trim() || 'unit';
-    const rak = document.getElementById('input-rak').value.trim() || '-';
-
-    if (!sku || !nama) return;
-
-    if (modeForm === 'edit') {
-        const item = barangData.find(b => b.sku === sku);
-        if (item) {
-            item.nama = nama;
-            item.kategori = kategori;
-            item.stok = stok;
-            item.satuan = satuan;
-            item.rak = rak;
-        }
-    } else {
-        barangData.push({ sku, nama, kategori, stok, satuan, rak });
-    }
-
-    renderTableBarang(barangData);
-    closeModal('modal-stok');
-}
-
-// Konfirmasi & Eksekusi Hapus
-function confirmDeleteBarang(sku) {
-    targetDeleteSku = sku;
-    document.getElementById('delete-target-sku').innerText = sku;
-    openModal('modal-hapus');
-}
-
-function executeDelete() {
-    if (targetDeleteSku) {
-        barangData = barangData.filter(item => item.sku !== targetDeleteSku);
-        renderTableBarang(barangData);
-        targetDeleteSku = null;
-        closeModal('modal-hapus');
-    }
 }
