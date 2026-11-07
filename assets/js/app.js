@@ -1,16 +1,14 @@
-
 // ==========================================
-// APP.JS - FUNGSI UMUM APLIKASI GUDANGKU
+// APP.JS - FUNGSI UMUM GUDANGKU
 // ==========================================
 
-// Inisialisasi ikon Lucide
 document.addEventListener('DOMContentLoaded', () => {
     if (window.lucide) {
         lucide.createIcons();
     }
 });
 
-// Fungsi Generic Buka Modal
+// Buka Modal
 function openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
@@ -27,7 +25,7 @@ function openModal(modalId) {
     }, 10);
 }
 
-// Fungsi Generic Tutup Modal
+// Tutup Modal
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     if (!modal) return;

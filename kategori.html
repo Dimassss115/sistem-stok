@@ -14,24 +14,33 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="assets/js/config.js"></script>
 </head>
-<body class="bg-[#e9f0f8] h-screen p-3 md:p-4 flex overflow-hidden">
+<body class="bg-[#e9f0f8] min-h-screen md:h-screen p-0 md:p-4 overflow-x-hidden md:overflow-hidden">
 
     <!-- FRAME UTAMA APLIKASI -->
-    <div class="w-full h-full bg-white rounded-[32px] shadow-2xl flex overflow-hidden">
+    <div class="w-full min-h-screen md:h-full bg-white md:rounded-[32px] shadow-2xl flex overflow-hidden">
         
+        <!-- OVERLAY MOBILE -->
+        <button id="sidebar-overlay" onclick="closeSidebar()" aria-label="Tutup menu" class="fixed inset-0 bg-slate-900/50 z-40 hidden md:hidden"></button>
+
         <!-- SIDEBAR CONTAINER (Kiri) -->
-        <aside class="w-64 flex flex-col shrink-0 bg-white">
+        <aside id="sidebar" class="fixed md:relative inset-y-0 left-0 z-50 w-72 md:w-64 h-screen md:h-full flex flex-col shrink-0 bg-white -translate-x-full md:translate-x-0 transition-transform duration-300">
             
             <!-- LOGO HEADER -->
-            <div class="px-6 py-5 flex items-center gap-3 bg-white">
-                <div class="p-2 bg-blue-600 text-white rounded-xl shadow-sm">
-                    <i data-lucide="box" class="w-6 h-6"></i>
+            <div class="px-6 py-5 flex items-center justify-between bg-white shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-blue-600 text-white rounded-xl shadow-sm">
+                        <i data-lucide="box" class="w-6 h-6"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-gray-800 tracking-tight">Gudangku</h1>
                 </div>
-                <h1 class="text-xl font-bold text-gray-800 tracking-tight">Gudangku</h1>
+                <!-- TOMBOL TUTUP MOBILE -->
+                <button onclick="closeSidebar()" class="md:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
             </div>
 
             <!-- PANEL BIRU SIDEBAR -->
-            <div class="flex-1 bg-[#1d61d1] text-white flex flex-col justify-between p-6 rounded-tr-[40px]">
+            <div class="flex-1 bg-[#1d61d1] text-white flex flex-col justify-between p-5 md:p-6 rounded-tr-[40px] overflow-y-auto">
                 
                 <div class="space-y-6">
                     <!-- Tombol Utama -->
@@ -42,31 +51,32 @@
 
                     <!-- Navigasi Menu Utama -->
                     <nav class="space-y-1 text-sm font-medium">
-    <a href="index.html" class="flex items-center gap-4 px-4 py-3 text-blue-100 hover:bg-white/10 rounded-full transition">
-        <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
-        <span>Dashboard</span>
-    </a>
-    <a href="barang.html" class="flex items-center gap-4 px-4 py-3 text-blue-100 hover:bg-white/10 rounded-full transition">
-        <i data-lucide="package" class="w-5 h-5"></i>
-        <span>Data Barang</span>
-    </a>
-    <a href="kategori.html" class="flex items-center gap-4 px-4 py-3 text-blue-100 hover:bg-white/10 rounded-full transition">
-        <i data-lucide="tags" class="w-5 h-5"></i>
-        <span>Kategori</span>
-    </a>
-    <a href="transaksi.html" class="flex items-center gap-4 px-4 py-3 text-blue-100 hover:bg-white/10 rounded-full transition">
-        <i data-lucide="arrow-left-right" class="w-5 h-5"></i>
-        <span>Stok Masuk & Keluar</span>
-    </a>
-    <a href="laporan.html" class="flex items-center gap-4 px-4 py-3 text-blue-100 hover:bg-white/10 rounded-full transition">
-        <i data-lucide="file-text" class="w-5 h-5"></i>
-        <span>Laporan Mutasi</span>
-    </a>
-</nav>
+                        <a href="index.html" class="flex items-center gap-4 px-4 py-3 text-blue-100 hover:bg-white/10 rounded-full transition">
+                            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                            <span>Dashboard</span>
+                        </a>
+                        <a href="barang.html" class="flex items-center gap-4 px-4 py-3 text-blue-100 hover:bg-white/10 rounded-full transition">
+                            <i data-lucide="package" class="w-5 h-5"></i>
+                            <span>Data Barang</span>
+                        </a>
+                        <!-- Menu Kategori Aktif -->
+                        <a href="kategori.html" class="flex items-center gap-4 px-4 py-3 bg-white text-[#1d61d1] rounded-full font-semibold transition">
+                            <i data-lucide="tags" class="w-5 h-5"></i>
+                            <span>Kategori</span>
+                        </a>
+                        <a href="transaksi.html" class="flex items-center gap-4 px-4 py-3 text-blue-100 hover:bg-white/10 rounded-full transition">
+                            <i data-lucide="arrow-left-right" class="w-5 h-5"></i>
+                            <span>Stok Masuk & Keluar</span>
+                        </a>
+                        <a href="laporan.html" class="flex items-center gap-4 px-4 py-3 text-blue-100 hover:bg-white/10 rounded-full transition">
+                            <i data-lucide="file-text" class="w-5 h-5"></i>
+                            <span>Laporan Mutasi</span>
+                        </a>
+                    </nav>
                 </div>
 
                 <!-- WIDGET KAPASITAS GUDANG -->
-                <div class="pt-5 border-t border-blue-400/30 text-xs space-y-3">
+                <div class="pt-5 mt-6 border-t border-blue-400/30 text-xs space-y-3">
                     <p class="text-[10px] font-bold tracking-wider text-blue-200 uppercase">Detail Kapasitas</p>
                     <div class="space-y-1">
                         <div class="flex justify-between text-blue-100 text-[11px]">
@@ -83,18 +93,25 @@
         </aside>
 
         <!-- AREA KONTEN UTAMA -->
-        <main class="flex-1 flex flex-col overflow-y-auto px-8 py-6">
+        <main class="flex-1 min-w-0 flex flex-col overflow-y-auto px-4 py-5 md:px-8 md:py-6">
             
             <!-- TOPBAR / HEADER -->
-            <header class="flex justify-between items-center mb-8">
-                <!-- Search Bar -->
-                <div class="relative w-96">
-                    <i data-lucide="search" class="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                    <input type="text" id="search-kategori" oninput="handleSearchKategori()" placeholder="Cari Nama Kategori..." class="w-full pl-11 pr-4 py-2.5 bg-gray-100/80 rounded-full text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700">
+            <header class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-7">
+                <!-- Search Bar & Hamburger -->
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <!-- HAMBURGER -->
+                    <button onclick="toggleSidebar()" aria-label="Buka menu" class="md:hidden p-2.5 bg-blue-50 text-[#1d61d1] rounded-xl shrink-0">
+                        <i data-lucide="menu" class="w-5 h-5"></i>
+                    </button>
+                    <!-- SEARCH -->
+                    <div class="relative w-full sm:w-96">
+                        <i data-lucide="search" class="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="search-kategori" oninput="handleSearchKategori()" placeholder="Cari Nama Kategori..." class="w-full pl-11 pr-4 py-3 bg-gray-100/80 rounded-full text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700">
+                    </div>
                 </div>
 
                 <!-- Profile -->
-                <div class="flex items-center gap-4">
+                <div class="flex items-center justify-end gap-4">
                     <button class="relative p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition">
                         <i data-lucide="bell" class="w-5 h-5"></i>
                         <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-600 rounded-full"></span>
@@ -115,12 +132,13 @@
             <div class="space-y-6">
                 
                 <div>
-                    <h2 class="text-lg font-bold text-gray-800">Master Kategori Barang</h2>
-                    <p class="text-xs text-gray-400">Pengelompokan jenis barang untuk mempermudah pencarian dan penataan rak gudang</p>
+                    <h2 class="text-xl md:text-2xl font-bold text-gray-800">Master Kategori Barang</h2>
+                    <p class="text-xs text-gray-400 mt-1">Pengelompokan jenis barang untuk mempermudah pencarian dan penataan rak gudang</p>
                 </div>
 
                 <!-- CARDS RINGKASAN KATEGORI -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="grid-kategori">
+                <!-- Di HP akan memanjang ke bawah (grid-cols-1), di desktop akan menjadi 3 kolom (md:grid-cols-3) -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5" id="grid-kategori">
                     <!-- Item Kategori di-render dinamis oleh assets/js/kategori.js -->
                 </div>
 
@@ -130,8 +148,8 @@
     </div>
 
     <!-- MODAL FORM: TAMBAH / EDIT KATEGORI -->
-    <div id="modal-kategori" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-200">
-        <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-200 space-y-5">
+    <div id="modal-kategori" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[60] flex items-center justify-center hidden opacity-0 transition-opacity duration-200 p-3">
+        <div class="bg-white rounded-3xl p-5 md:p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-200 space-y-5">
             
             <div class="flex justify-between items-center border-b border-gray-100 pb-3">
                 <div class="flex items-center gap-2.5">
@@ -148,12 +166,12 @@
             <form id="form-kategori" onsubmit="event.preventDefault(); saveKategori();" class="space-y-4 text-xs">
                 <div>
                     <label class="block font-semibold text-gray-700 mb-1">Nama Kategori</label>
-                    <input type="text" id="input-nama-kategori" required placeholder="Contoh: Perangkat Komunikasi" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-800">
+                    <input type="text" id="input-nama-kategori" required placeholder="Contoh: Perangkat Komunikasi" class="w-full px-3.5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-800">
                 </div>
 
-                <div class="flex justify-end gap-2 pt-3 border-t border-gray-100">
-                    <button type="button" onclick="closeModal('modal-kategori')" class="px-4 py-2.5 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition">Batal</button>
-                    <button type="submit" class="px-5 py-2.5 bg-[#1d61d1] text-white font-semibold rounded-xl hover:bg-blue-700 shadow-sm transition">Simpan Kategori</button>
+                <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-gray-100">
+                    <button type="button" onclick="closeModal('modal-kategori')" class="px-5 py-3 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition">Batal</button>
+                    <button type="submit" class="px-5 py-3 bg-[#1d61d1] text-white font-semibold rounded-xl hover:bg-blue-700 shadow-sm transition">Simpan Kategori</button>
                 </div>
             </form>
         </div>
@@ -162,5 +180,26 @@
     <!-- External Custom JS -->
     <script src="assets/js/app.js"></script>
     <script src="assets/js/kategori.js"></script>
+
+    <script>
+        // ==========================================
+        // SIDEBAR MOBILE SCRIPT
+        // ==========================================
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (!sidebar || !overlay) return;
+            sidebar.classList.remove('-translate-x-full');
+            overlay.classList.remove('hidden');
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (!sidebar || !overlay) return;
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('hidden');
+        }
+    </script>
 </body>
 </html>
