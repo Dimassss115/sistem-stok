@@ -28,46 +28,55 @@
             <p class="text-xs text-gray-400">Masukkan akun kredensial petugas gudang untuk masuk</p>
         </div>
 
-        <!-- Form Login -->
-        <form onsubmit="event.preventDefault(); window.location.href='index.html';" class="space-y-4 text-xs">
-            <div>
-                <label class="block font-semibold text-gray-700 mb-1">Username / Email</label>
-                <div class="relative">
-                    <i data-lucide="user" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                    <input type="text" required placeholder="admin@gudangku.com" class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-800">
-                </div>
-            </div>
-
-            <div>
-                <label class="block font-semibold text-gray-700 mb-1">Kata Sandi</label>
-                <div class="relative">
-                    <i data-lucide="lock" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                    <input type="password" required placeholder="••••••••" class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-800">
-                </div>
-            </div>
-
-            <div class="flex items-center justify-between text-gray-500 pt-1">
-                <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                    <span>Ingat saya</span>
-                </label>
-                <a href="#" onclick="alert('Hubungi Administrator Gudang untuk reset password.')" class="text-[#1d61d1] font-semibold hover:underline">Lupa sandi?</a>
-            </div>
-
-            <button type="submit" class="w-full bg-[#1d61d1] text-white font-bold py-3.5 rounded-xl hover:bg-blue-700 shadow-md transition text-sm flex items-center justify-center gap-2">
-                <i data-lucide="log-in" class="w-4 h-4"></i>
-                <span>Masuk ke Dashboard</span>
-            </button>
-        </form>
-
-        <div class="text-center pt-2 border-t border-gray-100">
-            <p class="text-[11px] text-gray-400">Prototype Sistem Manajemen Stok Gudang v1.0</p>
+       <!-- Form Login -->
+<form onsubmit="prosesLogin(event)" class="space-y-4 text-xs">
+    <div>
+        <label class="block font-semibold text-gray-700 mb-1">Username / Email</label>
+        <div class="relative">
+            <i data-lucide="user" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <input type="text" id="input-username" required placeholder="admin" class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-800">
         </div>
-
     </div>
 
-    <script>
-        lucide.createIcons();
-    </script>
+    <div>
+        <label class="block font-semibold text-gray-700 mb-1">Kata Sandi</label>
+        <div class="relative">
+            <i data-lucide="lock" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <input type="password" id="input-password" required placeholder="••••••••" class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-800">
+        </div>
+    </div>
+
+    <div class="flex items-center justify-between text-gray-500 pt-1">
+        <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+            <span>Ingat saya</span>
+        </label>
+        <a href="#" onclick="alert('Hubungi Administrator Gudang untuk reset password.')" class="text-[#1d61d1] font-semibold hover:underline">Lupa sandi?</a>
+    </div>
+
+    <button type="submit" class="w-full bg-[#1d61d1] text-white font-bold py-3.5 rounded-xl hover:bg-blue-700 shadow-md transition text-sm flex items-center justify-center gap-2">
+        <i data-lucide="log-in" class="w-4 h-4"></i>
+        <span>Masuk ke Dashboard</span>
+    </button>
+</form>
+
+<script>
+    if (window.lucide) lucide.createIcons();
+
+    function prosesLogin(event) {
+        event.preventDefault();
+        
+        const username = document.getElementById('input-username').value.trim();
+        const password = document.getElementById('input-password').value;
+
+        // Validasi Kredensial Admin
+        if (username === 'admin' && password === 'admin123') {
+            sessionStorage.setItem('gudangku_auth', 'true');
+            window.location.replace('index.html');
+        } else {
+            alert('Username atau Password salah!\nGunakan username: admin & password: admin123');
+        }
+    }
+</script>
 </body>
 </html>

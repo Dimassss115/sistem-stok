@@ -35,6 +35,11 @@ async function loadBarangFromSupabase() {
 
     allBarangData = barangData || [];
     renderTableBarang(allBarangData);
+
+    // UPDATE WIDGET SIDEBAR DI HALAMAN BARANG
+    if (typeof updateKapasitasWidget === 'function') {
+        updateKapasitasWidget(allBarangData);
+    }
 }
 
 // 2. RENDER TABLE
@@ -56,7 +61,9 @@ function renderTableBarang(data) {
     }
 
     tbody.innerHTML = data.map(item => {
-        const isKritis = item.stok <= 5;
+        // Di dalam renderTableBarang(data):
+const limitKritis = typeof getStokKritisLimit === 'function' ? getStokKritisLimit() : 5;
+const isKritis = Number(item.stok) <= limitKritis;
         const badgeKategoriColor = item.kategori_nama === 'Elektronik' 
             ? 'bg-blue-50 text-[#1d61d1]' 
             : 'bg-purple-50 text-purple-600';
@@ -101,13 +108,12 @@ function handleSearch() {
     renderTableBarang(filtered);
 }
 
-// 4. CREATE & UPDATE (Simpan / Edit Barang ke Supabase)
-
+// SIMPAN / EDIT BARANG KE SUPABASE
 async function saveBarang() {
     const sku = document.getElementById('input-sku').value.trim();
     const nama_barang = document.getElementById('input-nama').value.trim();
-    const kategori_nama = document.getElementById('input-kategori').value;
-    const stok = parseInt(document.getElementById('input-stok').value) || 0;
+    const kategori_nama = document.getElementById('input-kategori').value.trim() || 'Umum';
+    const stok = parseInt(document.getElementById('input-stok').value, 10) || 0;
     const satuan = document.getElementById('input-satuan').value.trim() || 'unit';
     const rak = document.getElementById('input-rak').value.trim() || '-';
 
@@ -148,8 +154,20 @@ async function saveBarang() {
         return;
     }
 
+    // Catat kategori kustom agar otomatis tersimpan di Master Kategori
+    saveCustomCategoryToLocal(kategori_nama);
+
     closeModal('modal-stok');
     await loadBarangFromSupabase();
+}
+
+function saveCustomCategoryToLocal(katName) {
+    if (!katName) return;
+    let customKategori = JSON.parse(localStorage.getItem('gudangku_custom_kategori') || '[]');
+    if (!customKategori.includes(katName)) {
+        customKategori.push(katName);
+        localStorage.setItem('gudangku_custom_kategori', JSON.stringify(customKategori));
+    }
 }
 
 

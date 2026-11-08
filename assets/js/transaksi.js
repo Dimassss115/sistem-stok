@@ -1,29 +1,92 @@
-// Mock Data Transaksi Mutasi Stok
-let transaksiData = [
-    { id: 'TRX-2026-001', tanggal: '05 Nov 2026, 14:30', sku: 'BRG-001', nama: 'Laptop Asus Core i5', tipe: 'MASUK', jumlah: 10, satuan: 'unit', keterangan: 'Restock dari PT. Asus Tek' },
-    { id: 'TRX-2026-002', tanggal: '05 Nov 2026, 11:15', sku: 'BRG-002', nama: 'Kabel LAN Cat6 50m', tipe: 'KELUAR', jumlah: 5, satuan: 'roll', keterangan: 'Penggunaan Lab Komputer 2' },
-    { id: 'TRX-2026-003', tanggal: '04 Nov 2026, 09:00', sku: 'BRG-003', nama: 'Switch Hub 16 Port', tipe: 'MASUK', jumlah: 15, satuan: 'unit', keterangan: 'Pengadaan Divisi IT' }
-];
-
+let allTransaksiData = [];
+let allBarangList = [];
 let activeFilter = 'SEMUA';
 
-// Render Tabel Transaksi saat halaman dimuat
+// Render Tabel dan Dropdown Barang saat Halaman Dimuat
 document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('tabel-transaksi-body')) {
-        renderTransaksiTable(transaksiData);
+        loadTransaksiFromSupabase();
+        loadSelectBarang();
     }
 });
 
+// 1. AMBIL RIWAYAT TRANSAKSI DARI SUPABASE
+async function loadTransaksiFromSupabase() {
+    const tbody = document.getElementById('tabel-transaksi-body');
+    if (!tbody) return;
+
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="6" class="py-8 text-center text-gray-400">
+                Memuat riwayat transaksi dari database...
+            </td>
+        </tr>
+    `;
+
+    const { data: trxData, error } = await supabaseClient
+        .from('transaksi')
+        .select('*')
+        .order('id', { ascending: false });
+
+    // Update Widget Sidebar Kapasitas Gudang
+    const { data: barangData } = await supabaseClient
+        .from('barang')
+        .select('stok');
+
+    if (barangData && typeof updateKapasitasWidget === 'function') {
+        updateKapasitasWidget(barangData);
+    }
+
+    if (error) {
+        console.error('Gagal mengambil data transaksi:', error);
+        tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-red-500">Gagal memuat transaksi dari database. Periksa tabel 'transaksi' di Supabase.</td></tr>`;
+        return;
+    }
+
+    allTransaksiData = trxData || [];
+    filterTransaksi(activeFilter);
+}
+
+// 2. MUAT PILIHAN BARANG DINAMIS KE FORM MODAL TRANSAKSI
+async function loadSelectBarang() {
+    const select = document.getElementById('trx-barang-select');
+    if (!select) return;
+
+    const { data, error } = await supabaseClient
+        .from('barang')
+        .select('*')
+        .order('nama_barang', { ascending: true });
+
+    if (error || !data) {
+        console.error('Gagal memuat daftar barang:', error);
+        return;
+    }
+
+    allBarangList = data;
+
+    if (data.length === 0) {
+        select.innerHTML = '<option value="">Belum ada barang di database</option>';
+        return;
+    }
+
+    select.innerHTML = data.map(item => `
+        <option value="${escapeHTML(item.sku)}">
+            ${escapeHTML(item.sku)} - ${escapeHTML(item.nama_barang)} (Stok Saat Ini: ${item.stok} ${escapeHTML(item.satuan || 'unit')})
+        </option>
+    `).join('');
+}
+
+// 3. TAMPILKAN TABEL TRANSAKSI
 function renderTransaksiTable(data) {
     const tbody = document.getElementById('tabel-transaksi-body');
     if (!tbody) return;
 
-    if (data.length === 0) {
+    if (!data || data.length === 0) {
         tbody.innerHTML = `
             <tr>
                 <td colspan="6" class="py-8 text-center text-gray-400">
                     <i data-lucide="file-search" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
-                    Riwayat transaksi tidak ditemukan.
+                    Belum ada riwayat transaksi mutasi.
                 </td>
             </tr>
         `;
@@ -36,14 +99,20 @@ function renderTransaksiTable(data) {
         const badgeColor = isMasuk ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-amber-50 text-amber-600 border-amber-100';
         const iconMutasi = isMasuk ? 'arrow-down-left' : 'arrow-up-right';
         const prefixJumlah = isMasuk ? '+' : '-';
+        
+        const tglDisplay = item.created_at 
+            ? new Date(item.created_at).toLocaleString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+            : (item.tanggal || '-');
+
+        const kodeTrx = item.kode_transaksi || `TRX-${item.id}`;
 
         return `
             <tr class="hover:bg-gray-50/50 transition">
-                <td class="py-3.5 px-5 font-semibold text-gray-900">${item.id}</td>
-                <td class="py-3.5 px-5 text-gray-500">${item.tanggal}</td>
+                <td class="py-3.5 px-5 font-semibold text-gray-900">${escapeHTML(kodeTrx)}</td>
+                <td class="py-3.5 px-5 text-gray-500">${tglDisplay}</td>
                 <td class="py-3.5 px-5">
-                    <p class="font-semibold text-[#1d61d1]">${item.sku}</p>
-                    <p class="text-[11px] text-gray-500">${item.nama}</p>
+                    <p class="font-semibold text-[#1d61d1]">${escapeHTML(item.sku)}</p>
+                    <p class="text-[11px] text-gray-500">${escapeHTML(item.nama_barang || item.nama)}</p>
                 </td>
                 <td class="py-3.5 px-5">
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 ${badgeColor} border rounded-full text-[11px] font-semibold">
@@ -52,9 +121,9 @@ function renderTransaksiTable(data) {
                     </span>
                 </td>
                 <td class="py-3.5 px-5 font-bold ${isMasuk ? 'text-emerald-600' : 'text-amber-600'}">
-                    ${prefixJumlah}${item.jumlah} ${item.satuan}
+                    ${prefixJumlah}${item.jumlah} ${escapeHTML(item.satuan || 'unit')}
                 </td>
-                <td class="py-3.5 px-5 text-gray-500 max-w-xs truncate">${item.keterangan}</td>
+                <td class="py-3.5 px-5 text-gray-500 max-w-xs truncate">${escapeHTML(item.keterangan || '-')}</td>
             </tr>
         `;
     }).join('');
@@ -62,11 +131,10 @@ function renderTransaksiTable(data) {
     if (window.lucide) lucide.createIcons();
 }
 
-// Filter Berdasarkan Tab (Semua, Masuk, Keluar)
+// 4. FILTER TAB TRANSAKSI
 function filterTransaksi(tipe) {
     activeFilter = tipe;
-    
-    // Toggle active tab style
+
     ['semua', 'masuk', 'keluar'].forEach(t => {
         const tab = document.getElementById(`tab-${t}`);
         if (tab) {
@@ -78,53 +146,100 @@ function filterTransaksi(tipe) {
         }
     });
 
-    let filtered = transaksiData;
+    let filtered = allTransaksiData;
     if (tipe !== 'SEMUA') {
-        filtered = transaksiData.filter(item => item.tipe === tipe);
+        filtered = allTransaksiData.filter(item => item.tipe === tipe);
     }
     renderTransaksiTable(filtered);
 }
 
-// Live Search Transaksi
+// 5. LIVE SEARCH TRANSAKSI
 function handleSearchTransaksi() {
     const keyword = document.getElementById('search-transaksi').value.toLowerCase().trim();
-    const filtered = transaksiData.filter(item => {
+    const filtered = allTransaksiData.filter(item => {
         const matchesFilter = activeFilter === 'SEMUA' || item.tipe === activeFilter;
-        const matchesKeyword = item.id.toLowerCase().includes(keyword) ||
-                               item.sku.toLowerCase().includes(keyword) ||
-                               item.nama.toLowerCase().includes(keyword) ||
-                               item.keterangan.toLowerCase().includes(keyword);
+        const matchesKeyword = (item.kode_transaksi || '').toLowerCase().includes(keyword) ||
+                               (item.sku || '').toLowerCase().includes(keyword) ||
+                               (item.nama_barang || '').toLowerCase().includes(keyword) ||
+                               (item.keterangan || '').toLowerCase().includes(keyword);
         return matchesFilter && matchesKeyword;
     });
     renderTransaksiTable(filtered);
 }
 
-// Submit Input Transaksi Baru
-function submitTransaksi() {
+// 6. SIMPAN TRANSAKSI & PERBARUI STOK BARANG DI SUPABASE
+async function submitTransaksi() {
     const tipe = document.querySelector('input[name="tipe_mutasi"]:checked').value;
     const sku = document.getElementById('trx-barang-select').value;
-    const jumlah = parseInt(document.getElementById('trx-jumlah').value);
-    const keterangan = document.getElementById('trx-keterangan').value;
+    const jumlah = parseInt(document.getElementById('trx-jumlah').value, 10);
+    const keterangan = document.getElementById('trx-keterangan').value.trim();
 
-    const namaMap = {
-        'BRG-001': { nama: 'Laptop Asus Core i5', satuan: 'unit' },
-        'BRG-002': { nama: 'Kabel LAN Cat6 50m', satuan: 'roll' },
-        'BRG-003': { nama: 'Switch Hub 16 Port', satuan: 'unit' }
-    };
+    if (!sku || isNaN(jumlah) || jumlah <= 0) {
+        alert('Pilih barang dan masukkan jumlah transaksi yang valid.');
+        return;
+    }
 
-    const newTrx = {
-        id: `TRX-2026-00${transaksiData.length + 1}`,
-        tanggal: new Date().toLocaleString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-        sku: sku,
-        nama: namaMap[sku].nama,
-        tipe: tipe,
-        jumlah: jumlah,
-        satuan: namaMap[sku].satuan,
-        keterangan: keterangan || '-'
-    };
+    const targetBarang = allBarangList.find(b => b.sku === sku);
+    if (!targetBarang) {
+        alert('Data barang tidak ditemukan.');
+        return;
+    }
 
-    transaksiData.unshift(newTrx);
-    filterTransaksi(activeFilter);
+    const stokLama = Number(targetBarang.stok) || 0;
+    let stokBaru = stokLama;
+
+    if (tipe === 'MASUK') {
+        stokBaru = stokLama + jumlah;
+    } else if (tipe === 'KELUAR') {
+        if (jumlah > stokLama) {
+            alert(`Stok tidak mencukupi! Stok ${targetBarang.nama_barang} saat ini hanya ada ${stokLama} ${targetBarang.satuan || 'unit'}.`);
+            return;
+        }
+        stokBaru = stokLama - jumlah;
+    }
+
+    // A. Update Jumlah Stok di Tabel 'barang' Supabase
+    const { error: errUpdate } = await supabaseClient
+        .from('barang')
+        .update({ stok: stokBaru })
+        .eq('sku', sku);
+
+    if (errUpdate) {
+        alert('Gagal mengupdate stok barang: ' + errUpdate.message);
+        return;
+    }
+
+    // B. Simpan Log Riwayat Mutasi ke Tabel 'transaksi' Supabase
+    const kodeTrx = `TRX-${Date.now().toString().slice(-6)}`;
+    const { error: errInsert } = await supabaseClient
+        .from('transaksi')
+        .insert([{
+            kode_transaksi: kodeTrx,
+            sku: sku,
+            nama_barang: targetBarang.nama_barang,
+            tipe: tipe,
+            jumlah: jumlah,
+            satuan: targetBarang.satuan || 'unit',
+            keterangan: keterangan || '-',
+            petugas: 'Admin Gudang'
+        }]);
+
+    if (errInsert) {
+        console.error('Gagal menyimpan log transaksi:', errInsert);
+    }
+
+    alert(`Transaksi Stok ${tipe} Berhasil!\nStok ${targetBarang.nama_barang} diperbarui dari ${stokLama} menjadi ${stokBaru} ${targetBarang.satuan || 'unit'}.`);
+
     closeModal('modal-transaksi');
     document.getElementById('form-transaksi').reset();
+
+    // Reload Data Baru
+    await loadSelectBarang();
+    await loadTransaksiFromSupabase();
+}
+
+function escapeHTML(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[char]));
 }

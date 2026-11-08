@@ -2,6 +2,23 @@
 
 body {
     font-family: 'Inter', sans-serif;
+    /* Animasi di body kita hapus agar background dan sidebar tetap statis */
+}
+
+/* Kita pasang animasi khusus untuk area konten utama saja */
+main {
+    animation: smoothFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes smoothFade {
+    0% {
+        opacity: 0;
+        transform: translateY(10px); /* Turun sedikit saat baru dimuat */
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0); /* Naik ke posisi semula */
+    }
 }
 
 /* Custom Scrollbar halus untuk area tabel & main content */
