@@ -293,6 +293,70 @@
     </main>
 </div>
 
+<!-- MODAL: ATUR BATAS STOK KRITIS -->
+<div id="modal-stok-kritis" class="hidden opacity-0 transition-opacity duration-200 fixed inset-0 bg-zinc-900/40 backdrop-blur-[2px] z-[60] flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl border border-zinc-200/80 shadow-xl w-full max-w-sm p-5 transform scale-95 transition-transform duration-200">
+        <div class="flex items-center justify-between pb-3.5 border-b border-zinc-100">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-[#f5ebeb] text-[#8c3b3b] border border-[#e3d1d1] flex items-center justify-center">
+                    <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-zinc-800">Batas Stok Kritis</h3>
+                    <p class="text-[11px] text-zinc-400">Ambang batas peringatan menipis</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeModal('modal-stok-kritis')"
+                class="p-1.5 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 rounded-lg transition">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+
+        <form id="form-stok-kritis" onsubmit="event.preventDefault(); simpanBatasStokKritis();" class="mt-4 space-y-4">
+            <div>
+                <label for="input-batas-kritis" class="block text-xs font-medium text-zinc-600 mb-1.5">
+                    Batas Maksimal Unit
+                </label>
+                <div class="relative">
+    <input type="number" id="input-batas-kritis" min="0" required
+        class="w-full pl-3.5 pr-12 py-2.5 bg-zinc-50/70 border border-zinc-200 rounded-xl text-sm font-semibold text-zinc-800 tabular-nums focus:bg-white focus:ring-2 focus:ring-zinc-800/10 focus:border-zinc-700 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+        placeholder="Contoh: 5">
+    <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-zinc-400 pointer-events-none">unit</span>
+</div>
+                <p id="error-batas-kritis" class="hidden text-[11px] text-[#991b1b] mt-1.5">
+                    Masukkan angka valid minimal 0.
+                </p>
+            </div>
+
+            <div>
+                <span class="block text-[11px] text-zinc-400 mb-1.5">Pilihan cepat:</span>
+                <div class="grid grid-cols-4 gap-2">
+                    <button type="button" onclick="document.getElementById('input-batas-kritis').value = 5"
+                        class="py-1.5 text-xs font-medium text-zinc-600 bg-zinc-100/80 hover:bg-zinc-200/70 rounded-lg transition tabular-nums">5</button>
+                    <button type="button" onclick="document.getElementById('input-batas-kritis').value = 10"
+                        class="py-1.5 text-xs font-medium text-zinc-600 bg-zinc-100/80 hover:bg-zinc-200/70 rounded-lg transition tabular-nums">10</button>
+                    <button type="button" onclick="document.getElementById('input-batas-kritis').value = 15"
+                        class="py-1.5 text-xs font-medium text-zinc-600 bg-zinc-100/80 hover:bg-zinc-200/70 rounded-lg transition tabular-nums">15</button>
+                    <button type="button" onclick="document.getElementById('input-batas-kritis').value = 20"
+                        class="py-1.5 text-xs font-medium text-zinc-600 bg-zinc-100/80 hover:bg-zinc-200/70 rounded-lg transition tabular-nums">20</button>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-3 border-t border-zinc-100">
+                <button type="button" onclick="closeModal('modal-stok-kritis')"
+                    class="px-4 py-2 border border-zinc-200 text-zinc-600 text-xs font-semibold rounded-xl hover:bg-zinc-50 transition">
+                    Batal
+                </button>
+                <button type="submit"
+                    class="px-4 py-2 bg-[#263954] text-white text-xs font-semibold rounded-xl hover:bg-[#1e2d42] transition">
+                    Simpan Batas
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
 <!-- ======================================
      MODAL TAMBAH BARANG
 ====================================== -->
@@ -325,7 +389,34 @@
         </div>
         <div>
             <label class="block font-semibold text-gray-700 mb-1">Lokasi Rak</label>
-            <input type="text" id="input-rak" placeholder="Contoh: Rak C-02" class="w-full px-3.5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-800">
+            <select id="input-rak" required
+    class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white">
+    <option value="">-- Pilih Lokasi Rak --</option>
+    <optgroup label="Zona A (Kapasitas 100/rak)">
+        <option value="Rak A-01">Rak A-01</option>
+        <option value="Rak A-02">Rak A-02</option>
+        <option value="Rak A-03">Rak A-03</option>
+        <option value="Rak A-04">Rak A-04</option>
+    </optgroup>
+    <optgroup label="Zona B (Kapasitas 100/rak)">
+        <option value="Rak B-01">Rak B-01</option>
+        <option value="Rak B-02">Rak B-02</option>
+        <option value="Rak B-03">Rak B-03</option>
+        <option value="Rak B-04">Rak B-04</option>
+    </optgroup>
+    <optgroup label="Zona C (Kapasitas 100/rak)">
+        <option value="Rak C-01">Rak C-01</option>
+        <option value="Rak C-02">Rak C-02</option>
+        <option value="Rak C-03">Rak C-03</option>
+        <option value="Rak C-04">Rak C-04</option>
+    </optgroup>
+    <optgroup label="Zona D (Kapasitas 100/rak)">
+        <option value="Rak D-01">Rak D-01</option>
+        <option value="Rak D-02">Rak D-02</option>
+        <option value="Rak D-03">Rak D-03</option>
+        <option value="Rak D-04">Rak D-04</option>
+    </optgroup>
+</select>
         </div>
     </div>
 
@@ -495,37 +586,38 @@ function renderDashboardTable(data) {
     tbody.innerHTML = latestData.map(item => {
         const stok = Number(item.stok) || 0;
         const isKritis = stok <= limitKritis;
+        const namaBarang = item.nama_barang || item.nama || '-';
         const kategori = item.kategori_nama || 'Umum';
-        const badgeKategori = kategori === 'Elektronik'
-            ? 'bg-blue-50 text-blue-600'
-            : 'bg-purple-50 text-purple-600';
 
-        const statusBadge = isKritis
-            ? '<span class="px-2.5 py-1 bg-red-100 text-red-600 rounded-full text-[10px] font-semibold">Stok Kritis</span>'
-            : '<span class="px-2.5 py-1 bg-emerald-100 text-emerald-600 rounded-full text-[10px] font-semibold">Aman</span>';
+       const statusBadge = isKritis
+            ? `<span class="inline-flex items-center gap-2 text-xs font-semibold text-[#991b1b]">
+                   <span class="w-1.5 h-1.5 rounded-full bg-[#dc2626]"></span>
+                   Stok Kritis
+               </span>`
+            : `<span class="inline-flex items-center gap-2 text-xs font-semibold text-[#2d5a42]">
+                   <span class="w-1.5 h-1.5 rounded-full bg-[#3f7a5b]"></span>
+                   Aman
+               </span>`;
 
         return `
-            <tr class="hover:bg-gray-50 transition">
-                <td class="py-4 px-5 font-semibold text-[#1d61d1]">
-                    ${escapeHTML(item.sku)}
-                </td>
-                <td class="py-4 px-5 font-medium text-gray-800">
-                    ${escapeHTML(item.nama_barang)}
-                </td>
-                <td class="py-4 px-5">
-                    <span class="px-2.5 py-1 ${badgeKategori} rounded-full text-[10px] font-medium">
-                        ${escapeHTML(kategori)}
+            <tr class="hover:bg-slate-50/70 transition border-b border-slate-100 last:border-none">
+                <td class="py-3.5 px-5 font-semibold text-[#1d61d1]">${item.sku}</td>
+                <td class="py-3.5 px-5 font-medium text-slate-800">${namaBarang}</td>
+                <td class="py-3.5 px-5">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-50 text-slate-700 border border-slate-200/80 capitalize">
+                        <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                        ${kategori}
                     </span>
                 </td>
-                <td class="py-4 px-5 font-semibold ${isKritis ? 'text-red-600' : 'text-gray-700'}">
-                    ${stok.toLocaleString('id-ID')} ${escapeHTML(item.satuan || 'unit')}
+                <td class="py-3.5 px-5 font-semibold tabular-nums ${isKritis ? 'text-slate-900' : 'text-slate-700'}">
+                    ${stok} <span class="text-xs font-normal text-slate-400">${item.satuan || 'pcs'}</span>
                 </td>
-                <td class="py-4 px-5 text-gray-500">
-                    ${escapeHTML(item.rak || '-')}
+                <td class="py-3.5 px-5">
+                    <span class="inline-block font-mono text-xs font-medium text-slate-600 bg-slate-50/80 border border-slate-200/80 px-2 py-0.5 rounded-md">
+                        ${item.rak || item.lokasi_rak || '-'}
+                    </span>
                 </td>
-                <td class="py-4 px-5 text-center">
-                    ${statusBadge}
-                </td>
+                <td class="py-3.5 px-5 text-center">${statusBadge}</td>
             </tr>
         `;
     }).join('');

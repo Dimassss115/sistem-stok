@@ -36,6 +36,9 @@ async function loadBarangFromSupabase() {
     allBarangData = barangData || [];
     renderTableBarang(allBarangData);
 
+    renderRingkasanRak(allBarangData);
+isiDropdownFilterRak(allBarangData);
+
     // UPDATE WIDGET SIDEBAR DI HALAMAN BARANG
     if (typeof updateKapasitasWidget === 'function') {
         updateKapasitasWidget(allBarangData);
@@ -59,35 +62,49 @@ function renderTableBarang(data) {
         if (window.lucide) lucide.createIcons();
         return;
     }
-
-    tbody.innerHTML = data.map(item => {
-        // Di dalam renderTableBarang(data):
-const limitKritis = typeof getStokKritisLimit === 'function' ? getStokKritisLimit() : 5;
-const isKritis = Number(item.stok) <= limitKritis;
-        const badgeKategoriColor = item.kategori_nama === 'Elektronik' 
-            ? 'bg-blue-50 text-[#1d61d1]' 
-            : 'bg-purple-50 text-purple-600';
+tbody.innerHTML = data.map(item => {
+        const limitKritis = typeof getStokKritisLimit === 'function' ? getStokKritisLimit() : 5;
+        const isKritis = Number(item.stok) <= limitKritis;
+        const namaBarang = item.nama_barang || item.nama || '-';
+        const namaAman = String(namaBarang).replace(/'/g, "\\'");
 
         const stokDisplay = isKritis
-            ? `${item.stok} ${item.satuan} <span class="px-1.5 py-0.5 bg-red-100 text-red-600 text-[9px] rounded font-bold ml-2">Stok Kritis</span>`
-            : `${item.stok} ${item.satuan}`;
+            ? `<div class="inline-flex items-center gap-2">
+                   <span class="font-semibold text-slate-900 tabular-nums">${item.stok} <span class="text-xs font-normal text-slate-400">${item.satuan}</span></span>
+                   <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-rose-50/80 text-rose-700 border border-rose-200/70">
+                       <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                       Stok Kritis
+                   </span>
+               </div>`
+            : `<span class="font-semibold text-slate-700 tabular-nums">${item.stok} <span class="text-xs font-normal text-slate-400">${item.satuan}</span></span>`;
 
         return `
-            <tr class="hover:bg-gray-50/50 transition">
+            <tr class="hover:bg-slate-50/70 transition">
                 <td class="py-3.5 px-5 font-semibold text-[#1d61d1]">${item.sku}</td>
-                <td class="py-3.5 px-5 font-medium text-gray-900">${item.nama_barang}</td>
+                <td class="py-3.5 px-5 font-medium text-slate-800">${namaBarang}</td>
                 <td class="py-3.5 px-5">
-                    <span class="px-2.5 py-1 ${badgeKategoriColor} rounded-full text-[11px] font-medium">${item.kategori_nama || 'Umum'}</span>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-50 text-slate-700 border border-slate-200/80 capitalize">
+                        <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                        ${item.kategori_nama}
+                    </span>
                 </td>
-                <td class="py-3.5 px-5 font-semibold ${isKritis ? 'text-red-600 flex items-center' : ''}">${stokDisplay}</td>
-                <td class="py-3.5 px-5 text-gray-400">${item.rak}</td>
-                <td class="py-3.5 px-5 text-center text-gray-400">
-                    <button onclick="openModalBarang('edit', '${item.sku}', '${item.nama_barang}', '${item.kategori_nama}', ${item.stok}, '${item.satuan}', '${item.rak}')" class="p-1 hover:text-[#1d61d1] mr-1" title="Edit">
-                        <i data-lucide="edit-3" class="w-4 h-4"></i>
-                    </button>
-                    <button onclick="confirmDeleteBarang('${item.sku}')" class="p-1 hover:text-red-600" title="Hapus">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                    </button>
+                <td class="py-3.5 px-5">${stokDisplay}</td>
+                <td class="py-3.5 px-5">
+                    <span class="inline-block font-mono text-xs font-medium text-slate-600 bg-slate-50/80 border border-slate-200/80 px-2 py-0.5 rounded-md">
+                        ${item.rak || '-'}
+                    </span>
+                </td>
+                <td class="py-3.5 px-5 text-center whitespace-nowrap">
+                    <div class="inline-flex items-center gap-1.5">
+                        <button type="button" onclick="openModalBarang('edit', '${item.sku}', '${namaAman}', '${item.kategori_nama}', ${item.stok}, '${item.satuan}', '${item.rak || ''}')" title="Edit Barang"
+                            class="p-1.5 text-slate-500 hover:text-[#1d61d1] hover:bg-blue-50/70 rounded-lg transition">
+                            <i data-lucide="edit-3" class="w-4 h-4"></i>
+                        </button>
+                        <button type="button" onclick="confirmDeleteBarang('${item.sku}')" title="Hapus Barang"
+                            class="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50/70 rounded-lg transition">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
                 </td>
             </tr>
         `;
@@ -216,4 +233,234 @@ function openModalBarang(mode = 'add', sku = '', nama = '', kategori = 'Elektron
     }
 
     openModal('modal-stok');
+}
+
+// ==========================================
+// FITUR RINGKASAN & FILTER 16 LOKASI RAK (16 x 100 = 1.600 SLOT)
+// ==========================================
+const KAPASITAS_PER_RAK = 100;
+const MASTER_RAK = [
+    'Rak A-01', 'Rak A-02', 'Rak A-03', 'Rak A-04',
+    'Rak B-01', 'Rak B-02', 'Rak B-03', 'Rak B-04',
+    'Rak C-01', 'Rak C-02', 'Rak C-03', 'Rak C-04',
+    'Rak D-01', 'Rak D-02', 'Rak D-03', 'Rak D-04'
+];
+
+function renderRingkasanRak(dataBarang) {
+    const container = document.getElementById('ringkasan-rak-container');
+    if (!container) return;
+
+    // 1. Inisialisasi seluruh 16 rak master dengan nilai awal 0
+    const grupRak = {};
+    MASTER_RAK.forEach(kodeRak => {
+        grupRak[kodeRak] = { jumlahSku: 0, totalUnit: 0 };
+    });
+
+    // 2. Hitung isi tiap rak dari data barang Supabase
+    (dataBarang || []).forEach(item => {
+        const namaRak = (item.lokasi_rak || item.rak || '').trim();
+        if (!namaRak) return;
+
+        // Jika ada data lama di luar 16 rak master (misal Rak V-03), tetap ikut ditampilkan
+        if (!grupRak[namaRak]) {
+            grupRak[namaRak] = { jumlahSku: 0, totalUnit: 0 };
+        }
+        grupRak[namaRak].jumlahSku += 1;
+        grupRak[namaRak].totalUnit += Number(item.stok || 0);
+    });
+
+    const rakAktif = document.getElementById('filter-rak')?.value || 'SEMUA';
+
+    container.innerHTML = Object.keys(grupRak).map(namaRak => {
+        const info = grupRak[namaRak];
+        const isKosong = info.totalUnit === 0;
+        const persen = Math.min(Math.round((info.totalUnit / KAPASITAS_PER_RAK) * 100), 100);
+        const isPenuh = persen >= 85;
+        const isSelected = rakAktif === namaRak;
+
+        const barColor = isPenuh ? 'bg-rose-500' : (persen >= 50 ? 'bg-amber-500' : 'bg-[#1d61d1]');
+        const borderCard = isSelected
+            ? 'border-[#1d61d1] ring-2 ring-[#1d61d1]/10 bg-slate-50/70'
+            : (isKosong
+                ? 'border-dashed border-slate-200 bg-slate-50/30 hover:border-slate-300'
+                : 'border-slate-200/80 bg-white hover:border-slate-300');
+
+        const badgeStatus = isKosong
+            ? `<span class="text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-100/80 text-slate-400">Kosong</span>`
+            : `<span class="text-[11px] font-medium tabular-nums px-2 py-0.5 rounded-md ${isPenuh ? 'bg-rose-50 text-rose-700 border border-rose-200/60' : 'bg-slate-100/80 text-slate-600'}">${persen}%</span>`;
+
+        return `
+            <div onclick="pilihFilterRak('${namaRak}')"
+                class="group cursor-pointer p-3.5 rounded-xl border ${borderCard} transition-all duration-150">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-[#1d61d1]' : (isKosong ? 'bg-slate-300' : 'bg-emerald-500')}"></span>
+                        <span class="font-mono text-xs font-semibold ${isKosong ? 'text-slate-500' : 'text-slate-800'}">
+                            ${namaRak}
+                        </span>
+                    </div>
+                    ${badgeStatus}
+                </div>
+
+                <div class="flex items-baseline justify-between mt-3 mb-2">
+                    <div class="text-base font-bold tracking-tight tabular-nums ${isKosong ? 'text-slate-400' : 'text-slate-900'}">
+                        ${info.totalUnit}<span class="text-xs font-normal text-slate-400">/${KAPASITAS_PER_RAK}</span>
+                    </div>
+                    <span class="text-[11px] text-slate-400 tabular-nums">
+                        ${isKosong ? '0 item' : `${info.jumlahSku} SKU`}
+                    </span>
+                </div>
+
+                <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div class="h-full ${barColor} rounded-full transition-all duration-300" style="width: ${persen}%"></div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    if (window.lucide) lucide.createIcons();
+}
+
+function isiDropdownFilterRak(dataBarang) {
+    const selectRak = document.getElementById('filter-rak');
+    if (!selectRak) return;
+
+    const nilaiSebelumnya = selectRak.value;
+
+    // Hitung unit per rak untuk info di dropdown
+    const totalPerRak = {};
+    MASTER_RAK.forEach(r => totalPerRak[r] = 0);
+    (dataBarang || []).forEach(item => {
+        const r = (item.lokasi_rak || item.rak || '').trim();
+        if (r) totalPerRak[r] = (totalPerRak[r] || 0) + Number(item.stok || 0);
+    });
+
+    const semuaDaftarRak = Object.keys(totalPerRak);
+
+    selectRak.innerHTML = `<option value="SEMUA">Semua Lokasi Rak (16 Rak)</option>` +
+        semuaDaftarRak.map(rak => {
+            const unit = totalPerRak[rak];
+            const labelStatus = unit === 0 ? 'Kosong' : `${unit}/${KAPASITAS_PER_RAK} unit`;
+            return `<option value="${rak}">${rak} — ${labelStatus}</option>`;
+        }).join('');
+
+    if (semuaDaftarRak.includes(nilaiSebelumnya)) {
+        selectRak.value = nilaiSebelumnya;
+    }
+}
+
+function pilihFilterRak(namaRak) {
+    const selectRak = document.getElementById('filter-rak');
+    if (!selectRak) return;
+
+    selectRak.value = (selectRak.value === namaRak && namaRak !== 'SEMUA') ? 'SEMUA' : namaRak;
+    terapkanFilterBarang();
+}
+
+function terapkanFilterBarang() {
+    const rakDipilih = document.getElementById('filter-rak')?.value || 'SEMUA';
+    const btnReset = document.getElementById('btn-reset-rak');
+
+    if (btnReset) {
+        btnReset.classList.toggle('hidden', rakDipilih === 'SEMUA');
+    }
+
+    const hasilFilter = (rakDipilih === 'SEMUA')
+        ? allBarangData
+        : allBarangData.filter(item => (item.lokasi_rak || item.rak || '').trim() === rakDipilih);
+
+    renderRingkasanRak(allBarangData);
+    renderTableBarang(hasilFilter);
+}
+
+let showAllRak = false;
+
+function toggleTampilanRak() {
+    showAllRak = !showAllRak;
+    renderRingkasanRak(allBarangData);
+}
+
+function renderRingkasanRak(dataBarang) {
+    const container = document.getElementById('ringkasan-rak-container');
+    if (!container) return;
+
+    // 1. Inisialisasi seluruh 16 rak master (16 x 100 = 1.600 slot)
+    const grupRak = {};
+    MASTER_RAK.forEach(kodeRak => {
+        grupRak[kodeRak] = { jumlahSku: 0, totalUnit: 0 };
+    });
+
+    // 2. Hitung isi tiap rak dari data Supabase
+    (dataBarang || []).forEach(item => {
+        const namaRak = (item.lokasi_rak || item.rak || '').trim();
+        if (!namaRak) return;
+
+        if (!grupRak[namaRak]) {
+            grupRak[namaRak] = { jumlahSku: 0, totalUnit: 0 };
+        }
+        grupRak[namaRak].jumlahSku += 1;
+        grupRak[namaRak].totalUnit += Number(item.stok || 0);
+    });
+
+    const semuaKodeRak = Object.keys(grupRak);
+    // Tampilkan 8 rak (2 baris) jika mode ringkas, atau seluruh rak jika mode penuh
+    const rakDitampilkan = showAllRak ? semuaKodeRak : semuaKodeRak.slice(0, 8);
+    const rakAktif = document.getElementById('filter-rak')?.value || 'SEMUA';
+
+    // Update teks & ikon tombol See More
+    const btnToggle = document.getElementById('btn-toggle-rak');
+    if (btnToggle) {
+        btnToggle.innerHTML = showAllRak
+            ? `<span>Tampilkan 2 Baris</span><i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>`
+            : `<span>Lihat Semua (${semuaKodeRak.length} Rak)</span><i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>`;
+    }
+
+    container.innerHTML = rakDitampilkan.map(namaRak => {
+        const info = grupRak[namaRak];
+        const isKosong = info.totalUnit === 0;
+        const persen = Math.min(Math.round((info.totalUnit / KAPASITAS_PER_RAK) * 100), 100);
+        const isPenuh = persen >= 85;
+        const isSelected = rakAktif === namaRak;
+
+        const barColor = isPenuh ? 'bg-rose-500' : (persen >= 50 ? 'bg-amber-500' : 'bg-[#1d61d1]');
+        const borderCard = isSelected
+            ? 'border-[#1d61d1] ring-2 ring-[#1d61d1]/10 bg-slate-50/70'
+            : (isKosong
+                ? 'border-dashed border-slate-200 bg-slate-50/30 hover:border-slate-300'
+                : 'border-slate-200/80 bg-white hover:border-slate-300');
+
+        const badgeStatus = isKosong
+            ? `<span class="text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-100/80 text-slate-400">Kosong</span>`
+            : `<span class="text-[11px] font-medium tabular-nums px-2 py-0.5 rounded-md ${isPenuh ? 'bg-rose-50 text-rose-700 border border-rose-200/60' : 'bg-slate-100/80 text-slate-600'}">${persen}%</span>`;
+
+        return `
+            <div onclick="pilihFilterRak('${namaRak}')"
+                class="group cursor-pointer p-3.5 rounded-xl border ${borderCard} transition-all duration-150">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-[#1d61d1]' : (isKosong ? 'bg-slate-300' : 'bg-emerald-500')}"></span>
+                        <span class="font-mono text-xs font-semibold ${isKosong ? 'text-slate-500' : 'text-slate-800'}">
+                            ${namaRak}
+                        </span>
+                    </div>
+                    ${badgeStatus}
+                </div>
+
+                <div class="flex items-baseline justify-between mt-3 mb-2">
+                    <div class="text-base font-bold tracking-tight tabular-nums ${isKosong ? 'text-slate-400' : 'text-slate-900'}">
+                        ${info.totalUnit}<span class="text-xs font-normal text-slate-400">/${KAPASITAS_PER_RAK}</span>
+                    </div>
+                    <span class="text-[11px] text-slate-400 tabular-nums">
+                        ${isKosong ? '0 item' : `${info.jumlahSku} SKU`}
+                    </span>
+                </div>
+
+                <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div class="h-full ${barColor} rounded-full transition-all duration-300" style="width: ${persen}%"></div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    if (window.lucide) lucide.createIcons();
 }

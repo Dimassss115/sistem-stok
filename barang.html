@@ -168,14 +168,47 @@
                     </button>
                 </div>
 
-                <!-- TABEL MASTER BARANG -->
-                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                    <div class="p-4 md:p-5 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 border-b border-gray-100">
-                        <h3 class="text-sm font-bold text-gray-800">Katalog Barang Gudang</h3>
-                        <div class="flex gap-2">
-                            <button class="w-full sm:w-auto px-3 py-2 border border-gray-200 text-gray-600 text-xs font-semibold rounded-lg hover:bg-gray-50">Filter Kategori</button>
-                        </div>
-                    </div>
+                <!-- Kartu Ringkasan Kepadatan per Rak -->
+<div class="mb-6">
+    <div class="flex items-center justify-between mb-3">
+        <h2 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+            <i data-lucide="layers" class="w-4 h-4 text-[#1d61d1]"></i>
+            Ringkasan Kapasitas & Kepadatan Rak
+        </h2>
+        <div class="flex items-center gap-3">
+            <button type="button" onclick="pilihFilterRak('SEMUA')" id="btn-reset-rak"
+                class="hidden text-xs font-semibold text-rose-600 hover:underline">
+                Reset Filter
+            </button>
+            <button type="button" onclick="toggleTampilanRak()" id="btn-toggle-rak"
+                class="inline-flex items-center gap-1 text-xs font-semibold text-[#1d61d1] hover:text-blue-700 bg-blue-50/70 hover:bg-blue-100/70 px-2.5 py-1 rounded-lg transition">
+                <span>Lihat Semua (16 Rak)</span>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- PASTIKAN BARIS INI ADA DI BAWAHNYA -->
+    <div id="ringkasan-rak-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+</div>
+
+               <!-- Header Toolbar Tabel Master Barang -->
+<div class="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+        <h3 class="text-sm font-semibold text-slate-800">Katalog Barang Gudang</h3>
+        <p class="text-xs text-slate-400 mt-0.5">Daftar inventaris aktif beserta alokasi rak penyimpanan</p>
+    </div>
+
+    <div class="flex items-center gap-2.5">
+        <div class="relative">
+            <select id="filter-rak" onchange="terapkanFilterBarang()"
+                class="appearance-none pl-3.5 pr-9 py-2 bg-slate-50/70 hover:bg-slate-100/70 border border-slate-200/80 rounded-lg text-xs font-medium text-slate-700 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-[#1d61d1] outline-none transition cursor-pointer">
+                <option value="SEMUA">Semua Lokasi Rak</option>
+            </select>
+            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"></i>
+        </div>
+    </div>
+</div>
 
                     <div class="overflow-x-auto">
                         <table class="w-full min-w-[700px] text-left border-collapse">
@@ -224,55 +257,87 @@
 
             <form id="form-barang" onsubmit="event.preventDefault(); typeof saveBarang === 'function' ? saveBarang() : saveDashboardBarang(event);" class="space-y-4 text-xs">
     
-    <!-- BARIS 1: SKU DAN RAK -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-            <label class="block font-semibold text-gray-700 mb-1">Kode SKU</label>
-            <input type="text" id="input-sku" required placeholder="Contoh: BRG-004" class="w-full px-3.5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-800">
-        </div>
-        <div>
-            <label class="block font-semibold text-gray-700 mb-1">Lokasi Rak</label>
-            <input type="text" id="input-rak" placeholder="Contoh: Rak C-02" class="w-full px-3.5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-800">
-        </div>
-    </div>
+   <div class="space-y-4 mt-4">
+                <!-- BARIS 1: KODE SKU & LOKASI RAK -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">Kode SKU</label>
+                        <input type="text" id="input-sku" required placeholder="Contoh: BRG-004"
+                            class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">Lokasi Rak</label>
+                        <select id="input-rak" required
+                            class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white">
+                            <option value="">-- Pilih Lokasi Rak --</option>
+                            <optgroup label="Zona A (Kapasitas 100/rak)">
+                                <option value="Rak A-01">Rak A-01</option>
+                                <option value="Rak A-02">Rak A-02</option>
+                                <option value="Rak A-03">Rak A-03</option>
+                                <option value="Rak A-04">Rak A-04</option>
+                            </optgroup>
+                            <optgroup label="Zona B (Kapasitas 100/rak)">
+                                <option value="Rak B-01">Rak B-01</option>
+                                <option value="Rak B-02">Rak B-02</option>
+                                <option value="Rak B-03">Rak B-03</option>
+                                <option value="Rak B-04">Rak B-04</option>
+                            </optgroup>
+                            <optgroup label="Zona C (Kapasitas 100/rak)">
+                                <option value="Rak C-01">Rak C-01</option>
+                                <option value="Rak C-02">Rak C-02</option>
+                                <option value="Rak C-03">Rak C-03</option>
+                                <option value="Rak C-04">Rak C-04</option>
+                            </optgroup>
+                            <optgroup label="Zona D (Kapasitas 100/rak)">
+                                <option value="Rak D-01">Rak D-01</option>
+                                <option value="Rak D-02">Rak D-02</option>
+                                <option value="Rak D-03">Rak D-03</option>
+                                <option value="Rak D-04">Rak D-04</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                </div>
 
-    <!-- BARIS 2: NAMA BARANG -->
-    <div>
-        <label class="block font-semibold text-gray-700 mb-1">Nama Barang</label>
-        <input type="text" id="input-nama" required placeholder="Masukkan nama barang..." class="w-full px-3.5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-800">
-    </div>
+                <!-- BARIS 2: NAMA BARANG -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Nama Barang</label>
+                    <input type="text" id="input-nama" required placeholder="Masukkan nama barang..."
+                        class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                </div>
 
-    <!-- BARIS 3: KATEGORI, STOK, SATUAN (3 KOLOM PRESISI) -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div>
-            <label class="block font-semibold text-gray-700 mb-1">Kategori</label>
-            <input type="text" id="input-kategori" list="list-kategori-gudang" required placeholder="Pilih / ketik..." class="w-full px-3.5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-800">
-        </div>
-        <div>
-            <label class="block font-semibold text-gray-700 mb-1">Jumlah Stok</label>
-            <input type="number" id="input-stok" min="0" required placeholder="0" class="w-full px-3.5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-800">
-        </div>
-        <div>
-            <label class="block font-semibold text-gray-700 mb-1">Satuan</label>
-            <input type="text" id="input-satuan" required placeholder="unit / pcs" class="w-full px-3.5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-800">
-        </div>
-    </div>
+                <!-- BARIS 3: KATEGORI, STOK, SATUAN -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">Kategori</label>
+                        <select id="input-kategori" required
+                            class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white">
+                            <option value="">Pilih</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">Jumlah Stok</label>
+                        <input type="number" id="input-stok" min="0" value="0" required
+                            class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">Satuan</label>
+                        <input type="text" id="input-satuan" required placeholder="unit / pcs"
+                            class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                    </div>
+                </div>
 
-    <!-- DATALIST REKOMENDASI (Ditaruh terpisah di luar grid agar tidak merusak kolom) -->
-    <datalist id="list-kategori-gudang">
-        <option value="Elektronik">
-        <option value="Jaringan">
-        <option value="Aksesoris">
-        <option value="Perkakas">
-        <option value="Furniture">
-        <option value="ATK">
-    </datalist>
-
-    <!-- BARIS 4: TOMBOL AKSI -->
-    <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t border-gray-100">
-        <button type="button" onclick="closeModal('modal-stok')" class="px-5 py-3 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition">Batal</button>
-        <button type="submit" id="btn-simpan" class="px-5 py-3 bg-[#1d61d1] text-white font-semibold rounded-xl hover:bg-blue-700 shadow-sm transition">Simpan Barang</button>
-    </div>
+                <!-- TOMBOL AKSI -->
+                <div class="flex justify-end gap-2 pt-3 border-t border-gray-100">
+                    <button type="button" onclick="closeModal('modal-stok')"
+                        class="px-5 py-2.5 border border-gray-200 text-gray-600 text-sm font-semibold rounded-xl hover:bg-gray-50 transition">
+                        Batal
+                    </button>
+                    <button type="submit"
+                        class="px-5 py-2.5 bg-[#1d61d1] text-white text-sm font-semibold rounded-xl hover:bg-blue-700 shadow-sm transition">
+                        Simpan Barang
+                    </button>
+                </div>
+            </div>
 </form>
         </div>
     </div>

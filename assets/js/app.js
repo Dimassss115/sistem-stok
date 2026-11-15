@@ -96,24 +96,49 @@ function getStokKritisLimit() {
 }
 
 function ubahBatasStokKritis() {
-    const limitLama = getStokKritisLimit();
-    const inputBaru = prompt('Masukkan batas maksimal unit untuk Stok Kritis:', limitLama);
-    
-    if (inputBaru !== null) {
-        const val = parseInt(inputBaru.trim(), 10);
-        if (!isNaN(val) && val >= 0) {
-            localStorage.setItem('gudangku_stok_kritis', val);
-            
-            // Panggil ulang render dashboard / tabel jika fungsi tersedia
-            if (typeof loadDashboardData === 'function') {
-                loadDashboardData();
-            } else if (typeof loadBarangFromSupabase === 'function') {
-                loadBarangFromSupabase();
-            } else {
-                location.reload();
-            }
-        } else {
-            alert('Mohon masukkan angka yang valid (≥ 0).');
+    const inputElem = document.getElementById('input-batas-kritis');
+    const errorElem = document.getElementById('error-batas-kritis');
+
+    // Jika dibuka dari halaman lain yang belum memiliki modal kustomnya
+    if (!inputElem) {
+        const limitLama = getStokKritisLimit();
+        const inputBaru = prompt('Masukkan batas maksimal unit untuk Stok Kritis:', limitLama);
+        if (inputBaru !== null && !isNaN(parseInt(inputBaru, 10)) && parseInt(inputBaru, 10) >= 0) {
+            localStorage.setItem('gudangku_stok_kritis', parseInt(inputBaru, 10));
+            location.reload();
         }
+        return;
+    }
+
+    inputElem.value = getStokKritisLimit();
+    if (errorElem) errorElem.classList.add('hidden');
+    openModal('modal-stok-kritis');
+
+    setTimeout(() => {
+        inputElem.focus();
+        inputElem.select();
+    }, 50);
+}
+
+function simpanBatasStokKritis() {
+    const inputElem = document.getElementById('input-batas-kritis');
+    const errorElem = document.getElementById('error-batas-kritis');
+    const val = parseInt(inputElem.value.trim(), 10);
+
+    if (isNaN(val) || val < 0) {
+        if (errorElem) errorElem.classList.remove('hidden');
+        return;
+    }
+
+    localStorage.setItem('gudangku_stok_kritis', val);
+    closeModal('modal-stok-kritis');
+
+    // Perbarui ringkasan dan tabel secara langsung tanpa reload halaman
+    if (typeof loadDashboardData === 'function') {
+        loadDashboardData();
+    } else if (typeof loadBarangFromSupabase === 'function') {
+        loadBarangFromSupabase();
+    } else {
+        location.reload();
     }
 }
