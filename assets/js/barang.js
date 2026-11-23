@@ -34,6 +34,7 @@ async function loadBarangFromSupabase() {
     }
 
     allBarangData = barangData || [];
+    renderKategoriDatalist();
     renderTableBarang(allBarangData);
 
     renderRingkasanRak(allBarangData);
@@ -142,16 +143,19 @@ async function saveBarang() {
     let error;
 
     if (modeForm === 'edit') {
+        const skuLama = document.getElementById('input-sku').dataset.oldSku || sku;
+
         ({ error } = await supabaseClient
             .from('barang')
             .update({
+                sku,
                 nama_barang,
                 kategori_nama,
                 stok,
                 satuan,
                 rak
             })
-            .eq('sku', sku));
+            .eq('sku', skuLama));
     } else {
         ({ error } = await supabaseClient
             .from('barang')
@@ -212,29 +216,89 @@ async function executeDelete() {
     }
 }
 
+function renderKategoriDatalist() {
+    const datalist = document.getElementById('list-kategori-gudang');
+    if (!datalist) return;
+
+    const kategoriDefault = ['Elektronik', 'Jaringan', 'Aksesoris', 'Perkakas', 'Furniture', 'ATK'];
+    const kategoriDatabase = (allBarangData || [])
+        .map(item => (item.kategori_nama || '').trim())
+        .filter(Boolean);
+    const kategoriCustom = JSON.parse(localStorage.getItem('gudangku_custom_kategori') || '[]');
+
+    const daftarKategori = [...new Set([
+        ...kategoriDefault,
+        ...kategoriDatabase,
+        ...kategoriCustom
+    ])].sort((a, b) => a.localeCompare(b, 'id'));
+
+    datalist.innerHTML = daftarKategori
+        .map(kat => `<option value="${kat}">`)
+        .join('');
+}
+
 // Modal helper
-function openModalBarang(mode = 'add', sku = '', nama = '', kategori = 'Elektronik', stok = '', satuan = '', rak = '') {
+async function openModalBarang(mode, sku = '', nama = '', kategori = '', stok = 0, satuan = '', rak = '') {
     modeForm = mode;
-    const title = document.getElementById('modal-title');
-    
+    const form = document.getElementById('form-barang');
+    const title = document.querySelector('#modal-stok h3');
+    const inputSku = document.getElementById('input-sku');
+
+    if (form) form.reset();
+
     if (mode === 'edit') {
-        title.innerText = 'Edit Data Barang';
-        document.getElementById('input-sku').value = sku;
-        document.getElementById('input-sku').readOnly = true;
-        document.getElementById('input-nama').value = nama;
+        if (title) title.textContent = 'Edit Data Barang';
+
+        // Jika tombol Edit mengirim objek { sku, nama_barang, ... }
+        if (typeof sku === 'object' && sku !== null) {
+            const obj = sku;
+            sku = obj.sku || '';
+            nama = obj.nama_barang || '';
+            kategori = obj.kategori_nama || '';
+            stok = obj.stok ?? 0;
+            satuan = obj.satuan || '';
+            rak = obj.rak || '';
+        } 
+        // Jika tombol Edit hanya mengirim kode SKU saja, ambil sisa datanya dari Supabase
+        else if (arguments.length === 2 && sku) {
+            const { data } = await supabaseClient
+                .from('barang')
+                .select('*')
+                .eq('sku', sku)
+                .single();
+            if (data) {
+                nama = data.nama_barang || '';
+                kategori = data.kategori_nama || '';
+                stok = data.stok ?? 0;
+                satuan = data.satuan || '';
+                rak = data.rak || '';
+            }
+        }
+
+        inputSku.value = sku;
+        inputSku.dataset.oldSku = sku;
+        inputSku.disabled = false;
+        inputSku.readOnly = false;
+        inputSku.classList.remove('bg-gray-100', 'cursor-not-allowed');
+
+       document.getElementById('input-nama').value = nama;
         document.getElementById('input-kategori').value = kategori;
         document.getElementById('input-stok').value = stok;
         document.getElementById('input-satuan').value = satuan;
         document.getElementById('input-rak').value = rak;
     } else {
-        title.innerText = 'Input Stok Barang Baru';
-        document.getElementById('input-sku').readOnly = false;
-        document.getElementById('form-barang').reset();
+        if (title) title.textContent = 'Input Stok Barang Baru';
+        renderKategoriDatalist(); // <-- Ganti dengan ini (atau pastikan sudah dipanggil di loadBarangFromSupabase)
+
+        inputSku.value = '';
+        delete inputSku.dataset.oldSku;
+        inputSku.disabled = false;
+        inputSku.readOnly = false;
+        inputSku.classList.remove('bg-gray-100', 'cursor-not-allowed');
     }
 
     openModal('modal-stok');
 }
-
 // ==========================================
 // FITUR RINGKASAN & FILTER 16 LOKASI RAK (16 x 100 = 1.600 SLOT)
 // ==========================================
